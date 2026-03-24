@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: bookinfo
+resources:
+- certificate.yaml
+- role.yaml
+- service.yaml
+- deployment.yaml
+- pdb.yaml
+- hpa.yaml
+- route.yaml
+- route-passthrough.yaml
+- gateway.yaml
+- virtualservice.yaml

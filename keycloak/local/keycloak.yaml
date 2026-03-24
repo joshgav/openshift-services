@@ -1,0 +1,15 @@
+apiVersion: keycloak.org/v1alpha1
+kind: Keycloak
+metadata:
+  name: app
+  labels:
+    keycloak: app
+spec:
+  externalAccess:
+    enabled: true
+  instances: 1
+  keycloakDeploymentSpec:
+    podannotations:
+      instrumentation.opentelemetry.io/inject-java: "true"
+  externalDatabase:
+    enabled: false

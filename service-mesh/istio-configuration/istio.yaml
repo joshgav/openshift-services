@@ -1,0 +1,31 @@
+apiVersion: sailoperator.io/v1
+kind: Istio
+metadata:
+  # cannot use name `default` when migrating from 2.x
+  # with spec.updateStrategy.type: RevisionBased
+  name: main
+spec:
+  namespace: istio-system
+  updateStrategy:
+    inactiveRevisionDeletionGracePeriodSeconds: 30
+    type: RevisionBased
+  values:
+    global:
+      logging:
+        level: debug
+      defaultPodDisruptionBudget:
+        enabled: false
+    meshConfig:
+      accessLogFile: /dev/stdout
+      discoverySelectors:
+        - matchLabels:
+            ossm3-discovery: enabled
+      enableTracing: true
+      extensionProviders:
+        - name: otel
+          opentelemetry:
+            port: 4317
+            service: opentelemetry-collector.istio-system.svc.cluster.local
+            resourceDetectors:
+              environment: {}
+  version: v1.26-latest

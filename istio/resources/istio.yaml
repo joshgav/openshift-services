@@ -1,0 +1,11 @@
+apiVersion: operator.istio.io/v1alpha1
+kind: Istio
+metadata:
+  name: istio-default
+spec:
+  version: latest
+  # version: v1.20.1
+  values:
+    pilot:
+      env:
+        PILOT_ENABLE_ALPHA_GATEWAY_API: true

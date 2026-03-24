@@ -1,0 +1,4 @@
+reportsController:
+  resources:
+    limits:
+      memory: 512Mi

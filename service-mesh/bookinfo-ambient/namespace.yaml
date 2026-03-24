@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bookinfo2
+  labels:
+    ossm3-ambient-discovery: enabled
+    ossm3-discovery: enabled
+    istio.io/dataplane-mode: ambient
+    istio.io/rev: ambient
+    # not sure if this can be applied without the waypoint deployed
+    # istio.io/use-waypoint: waypoint

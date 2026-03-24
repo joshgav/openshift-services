@@ -1,0 +1,23 @@
+kind: AnsibleAutomationPlatform
+apiVersion: aap.ansible.com/v1alpha1
+metadata:
+  name: aap
+  # name: ${ansible_instance_name}
+spec:
+  controller:
+    disabled: false
+  eda:
+    disabled: false
+  hub:
+    disabled: false
+    storage_type: S3
+    object_storage_s3_secret: ansible-automation-hub-s3
+    # storage_type: file
+    # file_storage_storage_class: efs
+    # file_storage_size: 10Gi
+  lightspeed:
+    disabled: false
+  service_type: ClusterIP
+  ingress_type: Route
+  route_tls_termination_mechanism: Edge
+  no_log: false

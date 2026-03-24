@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gateway-api-bookinfo
+  namespace: bookinfo
+spec:
+  commonName: 'gateway-api-bookinfo.apps.ipi.aws.joshgav.com'
+  dnsNames:
+    - 'gateway-api.apps.ipi.aws.joshgav.com'
+    - 'gateway-api-bookinfo.apps.ipi.aws.joshgav.com'
+    - 'bookinfo.apps.ipi.aws.joshgav.com'
+    - 'bookinfo.aws.joshgav.com'
+  secretName: gateway-api-bookinfo-keypair
+  issuerRef:
+    name: acme
+    kind: ClusterIssuer
+    group: cert-manager.io
+  subject:
+    organizationalUnits:
+      - 'kubernetes'
+  usages:
+    - server auth
+    - client auth
+    - digital signature
+    - key encipherment
+    - signing

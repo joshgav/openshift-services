@@ -1,0 +1,37 @@
+apiVersion: tempo.grafana.com/v1alpha1
+kind: TempoStack
+metadata:
+  name: default
+spec:
+  storageSize: 10Gi
+  storage:
+    secret:
+      name: tempo-secret
+      type: s3
+    tls:
+      enabled: true
+      caName: openshift-service-ca.crt
+  tenants:
+    mode: openshift
+    authentication:
+      - tenantName: dev
+        tenantId: "1610b0c3-c509-4592-a256-a1871353dbfa"
+      - tenantName: prod
+        tenantId: "1610b0c3-c509-4592-a256-a1871353dbfb"
+  template:
+    gateway:
+      enabled: true
+      ingress:
+        type: route
+    queryFrontend:
+      component:
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 1Gi
+  resources:
+    total:
+      limits:
+        memory: 2Gi
+        cpu: 2000m

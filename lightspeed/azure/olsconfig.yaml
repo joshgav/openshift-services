@@ -1,0 +1,21 @@
+apiVersion: ols.openshift.io/v1alpha1
+kind: OLSConfig
+metadata:
+  name: cluster
+  namespace: openshift-lightspeed
+spec:
+  llm:
+    providers:
+      - name: azure-openai
+        type: azure_openai
+        credentialsSecretRef:
+          name: azure-credential
+        url: https://lightspeed2.openai.azure.com/
+        models:
+          - name: gpt-4o
+        deploymentName: gpt-4o
+        apiVersion: 2024-12-01-preview
+  ols:
+    defaultModel: gpt-4o
+    defaultProvider: azure-openai
+    introspectionEnabled: true

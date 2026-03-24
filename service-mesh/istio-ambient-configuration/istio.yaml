@@ -1,0 +1,31 @@
+apiVersion: sailoperator.io/v1
+kind: Istio
+metadata:
+  name: ambient
+spec:
+  namespace: istio-system-ambient
+  profile: ambient
+  updateStrategy:
+    type: InPlace
+  values:
+    pilot:
+      trustedZtunnelNamespace: istio-ztunnel
+    global:
+      logging:
+        level: debug
+      defaultPodDisruptionBudget:
+        enabled: false
+    meshConfig:
+      accessLogFile: /dev/stdout
+      discoverySelectors:
+        - matchLabels:
+            istio-discovery: ambient
+      enableTracing: true
+      extensionProviders:
+        - name: otel
+          opentelemetry:
+            port: 4317
+            service: opentelemetry-collector.istio-system-ambient.svc.cluster.local
+            resourceDetectors:
+              environment: {}
+  version: v1.27-latest

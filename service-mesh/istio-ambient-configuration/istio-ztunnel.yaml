@@ -1,0 +1,11 @@
+apiVersion: sailoperator.io/v1
+kind: ZTunnel
+metadata:
+  name: default
+spec:
+  namespace: istio-ztunnel
+  version: v1.27-latest
+  values:
+    ztunnel:
+      revision: ambient
+      istioNamespace: istio-system-ambient

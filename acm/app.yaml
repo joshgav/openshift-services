@@ -1,0 +1,63 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: acm-operator
+  namespace: openshift-gitops
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: open-cluster-management
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: openshift-services/acm/operator
+    repoURL: https://github.com/joshgav/platform.git
+    targetRevision: main
+    kustomize: {}
+  syncPolicy:
+    automated: {}
+    syncOptions: {}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: acm-operand
+  namespace: openshift-gitops
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: open-cluster-management
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: openshift-services/acm/base
+    repoURL: https://github.com/joshgav/platform.git
+    targetRevision: main
+    kustomize: {}
+  syncPolicy:
+    automated: {}
+    syncOptions: {}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: acm-gitops
+  namespace: openshift-gitops
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: open-cluster-management
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: openshift-services/acm/argocd
+    repoURL: https://github.com/joshgav/platform.git
+    targetRevision: main
+    kustomize: {}
+  syncPolicy:
+    automated: {}
+    syncOptions: {}

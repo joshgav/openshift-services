@@ -1,7 +1,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
 metadata:
-  name: llama-32-deployment
+  name: gpt-oss-20b
   namespace: my-model
   labels:
     opendatahub.io/dashboard: 'true'

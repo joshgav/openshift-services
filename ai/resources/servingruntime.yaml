@@ -1,8 +1,8 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
 metadata:
-  name: gpt-oss-20b
-  namespace: my-model
+  name: redhat-gpt-oss-20b
+  namespace: llm
   labels:
     opendatahub.io/dashboard: 'true'
   annotations:

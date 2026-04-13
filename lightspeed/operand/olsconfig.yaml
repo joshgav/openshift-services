@@ -13,7 +13,16 @@ spec:
         url: https://bedrock-mantle.us-east-2.api.aws/v1
         models:
           - name: openai.gpt-oss-safeguard-120b
+      - name: openshift
+        type: rhoai_vllm
+        credentialsSecretRef:
+          name: openshiftai-credential
+        url: https://redhat-gpt-oss-20b-predictor.llm.svc.cluster.local:8443/v1
+        models:
+          - name: redhat-gpt-oss-20b
   ols:
-    defaultModel: openai.gpt-oss-safeguard-120b
-    defaultProvider: my-openai
+    defaultModel: redhat-gpt-oss-20b
+    defaultProvider: openshift
     introspectionEnabled: true
+    additionalCAConfigMapRef:
+      name: openshift-service-ca.crt

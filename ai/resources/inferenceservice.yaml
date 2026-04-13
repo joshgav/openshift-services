@@ -1,14 +1,14 @@
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
-  name: gpt-oss-20b
-  namespace: my-model
+  name: redhat-gpt-oss-20b
+  namespace: llm
   labels:
     opendatahub.io/dashboard: 'true'
     networking.kserve.io/visibility: exposed
   annotations:
     openshift.io/description: ''
-    openshift.io/display-name: gpt-oss-20b
+    openshift.io/display-name: redhat-gpt-oss-20b
     opendatahub.io/hardware-profile-namespace: redhat-ods-applications
     opendatahub.io/hardware-profile-name: gpu
     opendatahub.io/model-type: generative
@@ -16,6 +16,7 @@ metadata:
     security.opendatahub.io/enable-auth: "true"
 spec:
   predictor:
+    timeout: 300
     automountServiceAccountToken: false
     deploymentStrategy:
       type: Recreate
@@ -35,7 +36,7 @@ spec:
           cpu: '2'
           memory: 4Gi
           nvidia.com/gpu: '1'
-      runtime: gpt-oss-20b
+      runtime: redhat-gpt-oss-20b
       storageUri: 'oci://quay.io/redhat-ai-services/modelcar-catalog:gpt-oss-20b'
     tolerations:
       - effect: NoSchedule

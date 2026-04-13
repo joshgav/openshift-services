@@ -24,13 +24,13 @@
 
 ```
 cluster_domain=
-inference_url=https://gpt-oss-20b-my-model.apps.${cluster_domain}
+inference_url=https://redhat-gpt-oss-20b-llm.apps.${cluster_domain}
 token=
 curl -s ${inference_url}/v1/chat/completions \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json" \
     -d '{
-          "model": "gpt-oss-20b",
+          "model": "redhat-gpt-oss-20b",
           "messages": [{"role": "user", "content": "explain RBAC"}]
         }'
 ```

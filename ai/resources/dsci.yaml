@@ -1,0 +1,25 @@
+apiVersion: dscinitialization.opendatahub.io/v2
+kind: DSCInitialization
+metadata:
+  name: default-dsci
+spec:
+  applicationsNamespace: redhat-ods-applications
+  monitoring:
+    managementState: Managed                  # Required: Enables and manages the observability stack
+    namespace: redhat-ods-monitoring          # Required: Namespace where monitoring components are deployed
+    alerting: {}                              # Alertmanager configuration, uses default settings if empty
+    metrics:                                  # Prometheus configuration for metrics collection
+      replicas: 1                             # Optional: Number of Prometheus instances
+      storage:                                # Storage configuration for metrics data
+        size: 5Gi                             # Required: Storage size for Prometheus data
+        retention: 90d                        # Required: Retention period for metrics data in days
+      exporters: {}                           # External metrics exporters
+    traces:                                   # Tempo backend for distributed tracing
+      sampleRatio: '0.1'                      # Optional: Portion of traces to sample, expressed as a decimal
+      storage:                                # Storage configuration for trace data
+        backend: pv                           # Required: Storage backend for Tempo traces (pv, s3, or gcs)
+        retention: 2160h                      # Optional: Retention period for trace data in hours
+      exporters: {}                           # External traces exporters
+  trustedCABundle:
+    customCABundle: ''
+    managementState: Managed

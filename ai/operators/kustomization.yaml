@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- nodefeaturediscovery.yaml
+- nvidia-gpu-operator.yaml
+- leaderworkerset.yaml
+- connectivitylink.yaml
+- rhods.yaml
+- coo.yaml
+- tempo.yaml
+- opentelemetry.yaml

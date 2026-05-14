@@ -1,0 +1,13 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSAuthPolicy
+metadata:
+  name: redhat-gpt-oss-20b-llmd-access
+  namespace: models-as-a-service
+spec:
+  modelRefs:
+    - name: redhat-gpt-oss-20b-llmd
+      namespace: llm
+  subjects:
+    groups:
+      - name: system:authenticated
+    users: []

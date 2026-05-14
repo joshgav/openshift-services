@@ -3,8 +3,11 @@ kind: CheCluster
 metadata:
   name: devspaces
 spec:
-  components: {}
+  components:
+    pluginRegistry:
+      openVSXURL: https://open-vsx.org
   containerRegistry: {}
-  devEnvironments: {}
+  devEnvironments:
+    disableContainerRunCapabilities: false
   gitServices: {}
   networking: {}

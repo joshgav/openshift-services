@@ -1,0 +1,9 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSModelRef
+metadata:
+  name: redhat-gpt-oss-20b-llmd
+  namespace: llm
+spec:
+  modelRef:
+    kind: LLMInferenceService
+    name: redhat-gpt-oss-20b-llmd

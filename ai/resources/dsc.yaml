@@ -6,22 +6,27 @@ spec:
   components:
     aipipelines:
       argoWorkflowsControllers:
-        managementState: Removed 
-      managementState: Removed
+        managementState: Managed 
+      managementState: Managed
     dashboard:
       managementState: Managed
     feastoperator:
       managementState: Removed
     kserve:
       managementState: Managed
+      rawDeploymentServiceConfig: Headed
+      modelsAsService:
+        managementState: Managed
+      nim:
+        managementState: Managed
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
       managementState: Removed
     llamastackoperator:
-      managementState: Removed
+      managementState: Managed
     modelregistry:
-      managementState: Removed
+      managementState: Managed
       registriesNamespace: rhoai-model-registries
     ray:
       managementState: Removed
@@ -30,5 +35,5 @@ spec:
     trustyai:
       managementState: Removed
     workbenches:
-      managementState: Removed
+      managementState: Managed
       workbenchNamespace: rhods-notebooks 

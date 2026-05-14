@@ -1,0 +1,18 @@
+apiVersion: opendatahub.io/v1alpha
+kind: OdhDashboardConfig
+metadata:
+  name: odh-dashboard-config
+spec:
+  dashboardConfig:
+    disableTracking: false
+    genAiStudio: true
+    observabilityDashboard: true
+    vLLMDeploymentOnMaaS: true
+    maasAuthPolicies: true
+  hardwareProfileOrder: []
+  notebookController:
+    enabled: true
+    notebookNamespace: rhods-notebooks
+    pvcSize: 20Gi
+  templateDisablement: []
+  templateOrder: []

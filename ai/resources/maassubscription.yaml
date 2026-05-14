@@ -1,0 +1,16 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: redhat-gpt-oss-20b-llmd-sub
+  namespace: models-as-a-service
+spec:
+  owner:
+    groups:
+      - name: system:authenticated
+    users: []
+  modelRefs:
+    - name: redhat-gpt-oss-20b-llmd
+      namespace: llm
+      tokenRateLimits:
+        - limit: 1000000
+          window: 1m

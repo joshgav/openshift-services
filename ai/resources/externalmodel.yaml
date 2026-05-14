@@ -1,0 +1,25 @@
+# oc create secret generic bedrock-api-key --from-literal api-key="${bedrock_key}" -n models-as-a-service
+# kubectl label secret bedrock-api-key -n llm inference.networking.k8s.io/bbr-managed=true
+
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: ExternalModel
+metadata:
+  name: aws-gpt-oss-120b
+  namespace: models-as-a-service
+spec:
+  credentialRef:
+    name: bedrock-api-key
+  endpoint: bedrock-mantle.us-east-2.api.aws
+  provider: bedrock-openai
+  targetModel: 'openai.gpt-oss-120b'
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSModelRef
+metadata:
+  name: aws-gpt-oss-120b
+  namespace: models-as-a-service
+spec:
+  modelRef:
+    kind: ExternalModel
+    name: aws-gpt-oss-120b

@@ -1,5 +1,5 @@
 # oc create secret generic bedrock-api-key --from-literal api-key="${bedrock_key}" -n models-as-a-service
-# kubectl label secret bedrock-api-key -n llm inference.networking.k8s.io/bbr-managed=true
+# oc label secret bedrock-api-key -n models-as-a-service inference.networking.k8s.io/bbr-managed=true
 
 ---
 apiVersion: maas.opendatahub.io/v1alpha1

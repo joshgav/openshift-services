@@ -1,0 +1,29 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: mcp-gateway
+  namespace: openshift-mcp-gateway
+spec:
+  gatewayClassName: openshift-default
+  listeners:
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: mcp.apps.ipi.aws.joshgav.com
+      name: http
+      port: 80
+      protocol: HTTP
+    - allowedRoutes:
+        namespaces:
+          from: All
+      hostname: mcp.apps.ipi.aws.joshgav.com
+      name: https
+      port: 443
+      protocol: HTTPS
+      tls:
+        certificateRefs:
+          - group: ''
+            kind: Secret
+            name: mcp-gateway-keypair
+            namespace: openshift-mcp-gateway
+        mode: Terminate

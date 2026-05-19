@@ -1,0 +1,23 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mcp-gateway
+  namespace: openshift-mcp-gateway
+spec:
+  commonName: 'mcp.apps.ipi.aws.joshgav.com'
+  dnsNames:
+    - 'mcp.apps.ipi.aws.joshgav.com'
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: acme
+  secretName: mcp-gateway-keypair
+  subject:
+    organizationalUnits:
+      - kubernetes
+  usages:
+    - server auth
+    - client auth
+    - digital signature
+    - key encipherment
+    - signing

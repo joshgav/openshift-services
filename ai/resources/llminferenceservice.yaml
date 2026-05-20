@@ -1,0 +1,40 @@
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  annotations:
+    opendatahub.io/connections: secret-ezzur0
+    opendatahub.io/hardware-profile-name: gpu
+    opendatahub.io/hardware-profile-namespace: redhat-ods-applications
+    opendatahub.io/hardware-profile-resource-version: '388570'
+    opendatahub.io/model-type: generative
+    openshift.io/display-name: redhat-gpt-oss-20b
+  name: redhat-gpt-oss-20b
+  namespace: llm
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  # baseRefs:
+  #   - name: redhat-gpt-oss-20b
+  model:
+    uri: 'pvc://gpt-oss-20b/.'
+    # uri: 'oci://registry.redhat.io/rhelai1/modelcar-gpt-oss-20b:1.5'
+  replicas: 1
+  router:
+    gateway:
+      refs:
+        - name: maas-default-gateway
+          namespace: openshift-ingress
+    route: {}
+  template:
+    containers:
+      - name: main
+        image: 'registry.redhat.io/rhaii/vllm-cuda-rhel9@3.4.0'
+        resources:
+          limits:
+            cpu: '4'
+            memory: 4Gi
+            nvidia.com/gpu: '1'
+          requests:
+            cpu: '4'
+            memory: 4Gi
+            nvidia.com/gpu: '1'

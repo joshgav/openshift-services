@@ -1,0 +1,57 @@
+---
+# PVC for the model
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ministral
+  namespace: llm
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: gp3-csi
+  volumeMode: Filesystem
+---
+# Job to copy the model files:
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: copy-llm-01
+  namespace: llm
+spec:
+  template:
+    metadata:
+      name: copy-llm
+    spec:
+      # needed for multi-AZ EBS
+      nodeSelector:
+        topology.kubernetes.io/zone: us-east-2a
+      volumes:
+        - name: model
+          persistentVolumeClaim:
+            claimName: ministral
+      containers:
+        - name: main
+          command:
+            - /usr/bin/bash
+            - '-c'
+          env:
+            - name: HUGGINGFACE_REPO
+              value: RedHatAI/Ministral-3-3B-Instruct-2512
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: model
+              mountPath: /tmp/model
+          image: 'registry.access.redhat.com/ubi10/ubi:latest'
+          args:
+            - |
+              echo "going to copy model ${HUGGINGFACE_REPO}"
+              HOME=/tmp
+              curl -LsSf https://hf.co/cli/install.sh | bash
+              ${HOME}/.local/bin/hf download ${HUGGINGFACE_REPO} --local-dir /tmp/model
+              ls -alh /tmp/model
+      restartPolicy: Never

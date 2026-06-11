@@ -57,7 +57,7 @@ response=$(curl -sSk \
   -H "Authorization: Bearer $(oc whoami -t)" \
   -H "Content-Type: application/json" \
   -X POST \
-  -d "{\"name\": \"key-from-terminal\", \"description\": \"requested via  terminal\", \"expiresIn\": \"1d\", \"subscription\": \"${SUBSCRIPTION}\"}" \
+  -d "{\"name\": \"key-from-terminal\", \"description\": \"requested via  terminal\", \"expiresIn\": \"1d\", \"subscription\": \"${subscription}\"}" \
   "${base_url}/maas-api/v1/api-keys") && \
 token=$(echo ${response} | jq -r .key) && \
 echo "API key obtained: ${token:0:20}..."

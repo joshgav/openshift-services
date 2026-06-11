@@ -9,6 +9,9 @@ spec:
     observabilityDashboard: true
     vLLMDeploymentOnMaaS: true
     maasAuthPolicies: true
+    llmGatewayField: true
+    mcpCatalog: true
+    modelAsService: true
   hardwareProfileOrder: []
   notebookController:
     enabled: true

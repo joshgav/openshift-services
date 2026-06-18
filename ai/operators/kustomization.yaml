@@ -9,3 +9,4 @@ resources:
 - coo.yaml
 - tempo.yaml
 - opentelemetry.yaml
+- cnpg.yaml

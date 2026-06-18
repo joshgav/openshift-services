@@ -1,0 +1,15 @@
+kind: Cluster
+apiVersion: postgresql.cnpg.io/v1
+metadata:
+  name: maas
+  namespace: redhat-ods-applications
+spec:
+  instances: 1
+  logLevel: info
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 10Gi
+  walStorage:
+    size: 1Gi
+status:
+  instances: 1

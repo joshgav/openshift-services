@@ -14,20 +14,14 @@ spec:
       managementState: Removed
     kserve:
       managementState: Managed
-      rawDeploymentServiceConfig: Headed
       modelsAsService:
         managementState: Managed
-      nim:
-        managementState: Managed
     kueue:
-      defaultClusterQueueName: default
-      defaultLocalQueueName: default
       managementState: Removed
     llamastackoperator:
       managementState: Managed
     modelregistry:
       managementState: Managed
-      registriesNamespace: rhoai-model-registries
     ray:
       managementState: Removed
     trainingoperator:
@@ -36,4 +30,3 @@ spec:
       managementState: Removed
     workbenches:
       managementState: Managed
-      workbenchNamespace: rhods-notebooks 

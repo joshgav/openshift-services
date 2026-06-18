@@ -32,3 +32,5 @@ spec:
     provider: dex
     dex:
       openShiftOAuth: true
+  applicationSet:
+    enabled: true

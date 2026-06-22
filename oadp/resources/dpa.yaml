@@ -1,0 +1,33 @@
+apiVersion: oadp.openshift.io/v1alpha1
+kind: DataProtectionApplication
+metadata:
+  name: velero
+  namespace: openshift-adp
+spec:
+  backupLocations:
+  - velero:
+      default: true
+      objectStorage:
+        bucket: ${BUCKET_NAME}
+      provider: aws
+      config:
+        profile: default
+        region: noobaa
+        s3ForcePathStyle: 'true'
+        s3Url: ${S3_ENDPOINT:-'https://s3-openshift-storage.apps.ipi.aws.joshgav.com'}
+        # insecureSkipTlsVerify: 'true'
+      credential:
+        name: bsl-credentials
+        key: s3
+  backupImages: false
+  configuration:
+    nodeAgent:
+      enable: false
+      uploaderType: restic
+    velero:
+      defaultPlugins:
+        - openshift
+        - aws
+        - kubevirt
+      disableFsBackup: false
+  logFormat: text

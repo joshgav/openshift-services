@@ -1,8 +1,7 @@
 apiVersion: velero.io/v1
-kind: Backup
+kind: Restore
 metadata:
-  name: vms-backup
+  name: restore-1
   namespace: openshift-adp
 spec:
-  includedNamespaces:
-    - vms
+  backupName: backup-1

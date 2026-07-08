@@ -1,0 +1,18 @@
+kind: AnsibleAutomationPlatform
+apiVersion: aap.ansible.com/v1alpha1
+metadata:
+  name: aap
+  namespace: aap
+spec:
+  controller:
+    disabled: false
+  eda:
+    disabled: false
+  hub:
+    disabled: true
+  lightspeed:
+    disabled: false
+  service_type: ClusterIP
+  ingress_type: Route
+  route_tls_termination_mechanism: Edge
+  no_log: false

@@ -4,10 +4,27 @@ metadata:
   name: devspaces
 spec:
   components:
+    metrics:
+      enable: true
     pluginRegistry:
       openVSXURL: https://open-vsx.org
   containerRegistry: {}
   devEnvironments:
+    maxNumberOfWorkspacesPerUser: -1
+    maxNumberOfRunningWorkspacesPerUser: 5
     disableContainerRunCapabilities: false
+    disableContainerBuildCapabilities: false
+    defaultComponents:
+    - name: dev-tools
+      container:
+      # from https://catalog.redhat.com/en/software/containers/devspaces/udi-base-rhel10/68e980d6843057801e0f3432
+      - image: registry.access.redhat.com/devspaces/udi-base-rhel10:latest
+        memoryLimit: 8Gi
+        memoryRequest: 1Gi
+        cpuLimit: '1'
+        cpuRequest: 100m
+        mountSources: true
+    storage:
+      pvcStrategy: per-workspace
   gitServices: {}
   networking: {}

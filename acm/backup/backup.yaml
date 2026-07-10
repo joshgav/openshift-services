@@ -1,0 +1,74 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+    name: acm-backup
+    namespace: open-cluster-management-backup
+spec:
+    bucketName: acm-backup
+    storageClassName: openshift-storage.noobaa.io
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: acm-backup-credentials
+  namespace: open-cluster-management-backup
+stringData:
+  credentials: |
+    [default]
+    aws_access_key_id=${AWS_ACCESS_KEY_ID}
+    aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+type: Opaque
+---
+apiVersion: oadp.openshift.io/v1alpha1
+kind: DataProtectionApplication
+metadata:
+  name: acm-dpa
+  namespace: open-cluster-management-backup
+spec:
+  backupImages: false
+  backupLocations:
+    - velero:
+        config:
+          # insecureSkipTLSVerify: 'true'
+          profile: default
+          region: noobaa
+          s3ForcePathStyle: 'true'
+          s3Url: 'https://s3-openshift-storage.apps.${OPENSHIFT_CLUSTER_NAME}.${OPENSHIFT_BASE_DOMAIN}'
+        credential:
+          key: credentials
+          name: acm-backup-credentials
+        default: true
+        objectStorage:
+          bucket: acm-backup
+        provider: aws
+  snapshotLocations:
+    - name: default
+      velero:
+        provider: aws
+        config:
+          region: us-east-2
+          profile: "default"
+  configuration:
+    nodeAgent:
+      enable: true
+      uploaderType: kopia
+    velero:
+      defaultSnapshotMoveData: true
+      defaultPlugins:
+        - openshift
+        - aws
+        - kubevirt
+        - csi
+      featureFlags:
+        - EnableCSI
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: BackupSchedule
+metadata:
+  name: schedule-acm
+  namespace: open-cluster-management-backup
+spec:
+  veleroSchedule: 0 * * * *
+  veleroTtl: 120h
+  useManagedServiceAccount: true
+  paused: false

@@ -1,24 +1,24 @@
 apiVersion: oadp.openshift.io/v1alpha1
 kind: DataProtectionApplication
 metadata:
-  name: default-dpa
+  name: velero-default-dpa
   namespace: openshift-adp
 spec:
+  backupImages: false
   backupLocations:
     - velero:
         config:
-          insecureSkipTLSVerify: 'true'
+          # insecureSkipTLSVerify: 'true'
           profile: default
           region: noobaa
           s3ForcePathStyle: 'true'
-          s3Url: 'https://s3.openshift-storage.svc'
+          s3Url: 'https://s3-openshift-storage.apps.${OPENSHIFT_CLUSTER_NAME}.${OPENSHIFT_BASE_DOMAIN}'
         credential:
-          key: credential
-          name: openshift-adp-s3-creds
+          key: credentials
+          name: bsl-credentials
         default: true
         objectStorage:
-          bucket: openshift-adp
-          prefix: velero
+          bucket: oadp-backup
         provider: aws
   configuration:
     nodeAgent:
@@ -31,3 +31,5 @@ spec:
         - aws
         - kubevirt
         - csi
+      featureFlags:
+        - EnableCSI

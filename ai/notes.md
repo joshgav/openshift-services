@@ -49,9 +49,9 @@ EOF
 
 ```bash
 base_url=https://maas.apps.ipi.aws.joshgav.com
-url=${base_url}/llm/redhat-gpt-oss-20b
-model=redhat-gpt-oss-20b
-subscription=gpt-oss
+model=redhat-ministral
+url=${base_url}/llm/${model}
+subscription=ministral
 
 response=$(curl -sSk \
   -H "Authorization: Bearer $(oc whoami -t)" \

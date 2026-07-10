@@ -1,0 +1,15 @@
+- https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.21/html/configuring_openshift_data_foundation_disaster_recovery_for_openshift_workloads/rdr-solution#regional-dr-deployment-workflow_rdr
+
+- Deploy 2 clusters from ACM, wait for readiness
+- install Identity Providers and certificates, wait for readiness
+    - set OPENSHIFT_CLUSTER_NAME appropriately
+- configure Submariner for these two clusters
+- install ODF operator in both clusters
+- install a StorageCluster in both clusters
+    - https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.21/html-single/configuring_openshift_data_foundation_disaster_recovery_for_openshift_workloads/index#creating-odf-cluster-on-managed-clusters_rdr
+    - update `StorageCluster` resource for multiClusterService
+    - apply ServiceExport to clusters
+    - `oc annotate storagecluster ocs-storagecluster -n openshift-storage ocs.openshift.io/api-server-exported-address=spoke1.ocs-provider-server.openshift-storage.svc.clusterset.local:50051` 
+- install OADP in both clusters
+    - create a bucket in hub cluster for storing backups
+    - install a DataProtectionApplication with bucket secret in both spokes

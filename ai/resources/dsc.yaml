@@ -30,3 +30,5 @@ spec:
       managementState: Removed
     workbenches:
       managementState: Managed
+    mlflowoperator:
+      managementState: Managed

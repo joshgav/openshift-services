@@ -1,0 +1,26 @@
+---
+apiVersion: perses.dev/v1alpha2
+kind: PersesGlobalDatasource
+metadata:
+  name: tempo-default
+spec:
+  config:
+    display:
+      name: "Tempo Datasource"
+    default: true
+    plugin:
+      kind: "TempoDatasource"
+      spec:
+        proxy:
+          kind: HTTPProxy
+          spec:
+            url: https://tempo-default-gateway.tempo.svc.cluster.local:8080/api/traces/v1/dev/tempo
+            headers:
+              X-Scope-OrgID: dev
+            secret: tempo-default-secret
+  client:
+    tls:
+      enable: true
+      caCert:
+        type: file
+        certPath: /ca/service-ca.crt

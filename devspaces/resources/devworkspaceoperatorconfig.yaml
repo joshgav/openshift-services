@@ -1,0 +1,15 @@
+apiVersion: controller.devfile.io/v1alpha1
+kind: DevWorkspaceOperatorConfig
+metadata:
+  name: devworkspace-operator-config
+  namespace: openshift-devspaces
+config:
+  workspace:
+    backupCronJob:
+      enable: true
+      registry:
+        path: image-registry.openshift-image-registry.svc:5000
+      oras:
+        extraArgs: '--insecure'
+      schedule: '0 */4 * * *'
+    imagePullPolicy: Always

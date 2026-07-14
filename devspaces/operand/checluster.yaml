@@ -8,6 +8,13 @@ spec:
       enable: true
     pluginRegistry:
       openVSXURL: https://open-vsx.org
+    dashboard:
+      deployment:
+        containers:
+        - env:
+          - name: DWO_NAMESPACE
+            value: openshift-devspaces
+          name: che-dashboard
   containerRegistry: {}
   devEnvironments:
     maxNumberOfWorkspacesPerUser: -1

@@ -9,14 +9,14 @@ spec:
     - allowedRoutes:
         namespaces:
           from: All
-      hostname: mcp.apps.ipi.aws.joshgav.com
+      hostname: mcp.aws.joshgav.com
       name: http
       port: 80
       protocol: HTTP
     - allowedRoutes:
         namespaces:
           from: All
-      hostname: mcp.apps.ipi.aws.joshgav.com
+      hostname: mcp.aws.joshgav.com
       name: https
       port: 443
       protocol: HTTPS

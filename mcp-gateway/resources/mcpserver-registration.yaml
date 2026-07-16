@@ -1,0 +1,12 @@
+apiVersion: mcp.kuadrant.io/v1alpha1
+kind: MCPServerRegistration
+metadata:
+  name: openshift-mcp-server
+  namespace: openshift-mcp-server
+spec:
+  prefix: openshift_
+  targetRef:
+    group: "gateway.networking.k8s.io"
+    kind: "HTTPRoute"
+    name: mcp-gateway-to-server
+    namespace: openshift-mcp-server

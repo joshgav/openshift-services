@@ -8,7 +8,9 @@ kind: OperatorGroup
 metadata:
   name: openshift-mcp-gateway
   namespace: openshift-mcp-gateway
-spec: {}
+spec:
+  targetNamespaces:
+  - openshift-mcp-gateway
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription

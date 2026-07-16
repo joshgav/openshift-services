@@ -4,9 +4,9 @@ metadata:
   name: mcp-gateway
   namespace: openshift-mcp-gateway
 spec:
-  commonName: 'mcp.apps.ipi.aws.joshgav.com'
+  commonName: 'mcp.aws.joshgav.com'
   dnsNames:
-    - 'mcp.apps.ipi.aws.joshgav.com'
+    - 'mcp.aws.joshgav.com'
   issuerRef:
     group: cert-manager.io
     kind: ClusterIssuer

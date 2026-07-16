@@ -1,0 +1,18 @@
+apiVersion: kuadrant.io/v1
+kind: DNSPolicy
+metadata:
+  name: mcp-gateway-dnspolicy
+  namespace: openshift-mcp-gateway
+spec:
+  healthCheck:
+    failureThreshold: 3
+    interval: 10s
+    path: /healthz/ready
+    port: 15021
+    protocol: HTTP
+  targetRef:
+    name: mcp-gateway
+    group: gateway.networking.k8s.io
+    kind: Gateway
+  providerRefs:
+  - name: aws-credentials

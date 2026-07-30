@@ -1,0 +1,185 @@
+apiVersion: perses.dev/v1alpha2
+kind: PersesDashboard
+metadata:
+  labels:
+    app.kubernetes.io/name: perses-dashboard
+    app.kubernetes.io/instance: acm
+    app.kubernetes.io/part-of: perses-operator
+  name: acm
+  namespace: default
+spec:
+  config:
+    display:
+      name: ACM
+    panels:
+      3c7fc7faa2404d25997ddb5c5aaa78cc:
+        kind: Panel
+        spec:
+          display:
+            name: Provisioner Logs
+          plugin:
+            kind: LogsTable
+            spec:
+              allowWrap: true
+              enableDetails: true
+              showTime: true
+          queries:
+            - kind: LogQuery
+              spec:
+                plugin:
+                  kind: LokiLogQuery
+                  spec:
+                    datasource:
+                      kind: LokiDatasource
+                      name: loki-global-datasource
+                    query: '{ k8s_namespace_name="first-slqqw" } | json | line_format "{{ .message
+                      }}"'
+      907e67dc53b844e3a15d451bebac882d:
+        kind: Panel
+        spec:
+          display:
+            name: ManifestWork
+          plugin:
+            kind: TimeSeriesChart
+            spec: {}
+          queries:
+            - kind: TimeSeriesQuery
+              spec:
+                plugin:
+                  kind: PrometheusTimeSeriesQuery
+                  spec:
+                    query: rate(acm_manifestwork_count[5m])
+      bc62873e0fb1498a8ff0c6abbe8827a0:
+        kind: Panel
+        spec:
+          display:
+            name: "# Managed Clusters"
+          plugin:
+            kind: StatChart
+            spec:
+              calculation: last-number
+              format:
+                unit: decimal
+              legendMode: auto
+          queries:
+            - kind: TimeSeriesQuery
+              spec:
+                plugin:
+                  kind: PrometheusTimeSeriesQuery
+                  spec:
+                    query: acm_managed_cluster_count
+      2509fe3bfc5d49c9b1248eb717570c82:
+        kind: Panel
+        spec:
+          display:
+            name: Available Policies
+          plugin:
+            kind: StatChart
+            spec:
+              calculation: last-number
+              format:
+                unit: decimal
+              legendMode: auto
+          queries:
+            - kind: TimeSeriesQuery
+              spec:
+                plugin:
+                  kind: PrometheusTimeSeriesQuery
+                  spec:
+                    query: count(policy_governance_info{type="root"})
+      b7f6fc7759824957b71479fb4cc9e82b:
+        kind: Panel
+        spec:
+          display:
+            name: Active Policies
+          plugin:
+            kind: StatChart
+            spec:
+              calculation: last-number
+              format:
+                unit: decimal
+              legendMode: auto
+          queries:
+            - kind: TimeSeriesQuery
+              spec:
+                plugin:
+                  kind: PrometheusTimeSeriesQuery
+                  spec:
+                    query: count(policy_governance_info{type="propagated"})
+      263b1c0924a94ce9b4e861b3f363f6dd:
+        kind: Panel
+        spec:
+          display:
+            name: Failed Policies
+          plugin:
+            kind: StatChart
+            spec:
+              calculation: last-number
+              format:
+                unit: decimal
+              legendMode: auto
+          queries:
+            - kind: TimeSeriesQuery
+              spec:
+                plugin:
+                  kind: PrometheusTimeSeriesQuery
+                  spec:
+                    query: count(policy_governance_info{type="propagated"} @ end() > 0) or vector(0)
+    layouts:
+      - kind: Grid
+        spec:
+          display:
+            title: Policies
+            collapse:
+              open: true
+          items:
+            - x: 0
+              "y": 0
+              width: 4
+              height: 5
+              content:
+                $ref: "#/spec/panels/2509fe3bfc5d49c9b1248eb717570c82"
+            - x: 4
+              "y": 0
+              width: 4
+              height: 5
+              content:
+                $ref: "#/spec/panels/b7f6fc7759824957b71479fb4cc9e82b"
+            - x: 8
+              "y": 0
+              width: 3
+              height: 5
+              content:
+                $ref: "#/spec/panels/263b1c0924a94ce9b4e861b3f363f6dd"
+          repeatVariable: ""
+      - kind: Grid
+        spec:
+          display:
+            title: OCM
+            collapse:
+              open: true
+          items:
+            - x: 0
+              "y": 0
+              width: 4
+              height: 6
+              content:
+                $ref: "#/spec/panels/bc62873e0fb1498a8ff0c6abbe8827a0"
+            - x: 0
+              "y": 6
+              width: 12
+              height: 6
+              content:
+                $ref: "#/spec/panels/907e67dc53b844e3a15d451bebac882d"
+            - x: 12
+              "y": 0
+              width: 12
+              height: 12
+              content:
+                $ref: "#/spec/panels/3c7fc7faa2404d25997ddb5c5aaa78cc"
+          repeatVariable: ""
+    variables: []
+    duration: 1h
+    refreshInterval: 30s
+    datasources: {}
+    links: []

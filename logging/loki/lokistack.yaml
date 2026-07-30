@@ -24,4 +24,4 @@ spec:
   limits:
     global:
       retention:
-        days: 1
+        days: 3

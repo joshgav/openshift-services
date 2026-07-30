@@ -33,5 +33,7 @@ spec:
         mountSources: true
     storage:
       pvcStrategy: per-workspace
+    persistUserHome:
+      enabled: false
   gitServices: {}
   networking: {}

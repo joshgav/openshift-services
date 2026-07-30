@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: stable-policies
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: open-cluster-management-policies
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: stable
+    repoURL: https://github.com/open-cluster-management-io/policy-collection.git
+    targetRevision: main
+    directory:
+      recurse: true
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

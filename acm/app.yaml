@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: acm-operator
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
@@ -12,19 +14,22 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: openshift-services/acm/operator
-    repoURL: https://github.com/joshgav/platform.git
+    path: acm/operator
+    repoURL: https://github.com/joshgav/openshift-services.git
     targetRevision: main
     kustomize: {}
   syncPolicy:
     automated: {}
-    syncOptions: {}
+    syncOptions:
+    - CreateNamespace=true
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: acm-operand
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
@@ -33,19 +38,20 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: openshift-services/acm/base
-    repoURL: https://github.com/joshgav/platform.git
+    path: acm/base
+    repoURL: https://github.com/joshgav/openshift-services.git
     targetRevision: main
     kustomize: {}
   syncPolicy:
     automated: {}
-    syncOptions: {}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: acm-gitops
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
@@ -54,10 +60,15 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: openshift-services/acm/argocd
-    repoURL: https://github.com/joshgav/platform.git
+    path: acm/argocd
+    repoURL: https://github.com/joshgav/openshift-services.git
     targetRevision: main
     kustomize: {}
   syncPolicy:
     automated: {}
-    syncOptions: {}
+    retry:
+      limit: -1
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m

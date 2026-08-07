@@ -1,0 +1,21 @@
+apiVersion: ols.openshift.io/v1alpha1
+kind: OLSConfig
+metadata:
+  name: cluster
+  namespace: openshift-lightspeed
+spec:
+  llm:
+    providers:
+      - name: aws-bedrock
+        type: openai
+        credentialsSecretRef:
+          name: aws-bedrock-credential
+        url: https://bedrock-mantle.us-east-2.api.aws/v1
+        models:
+          - name: openai.gpt-oss-120b
+  ols:
+    defaultModel: openai.gpt-oss-120b
+    defaultProvider: aws-bedrock
+    introspectionEnabled: true
+    additionalCAConfigMapRef:
+      name: openshift-service-ca.crt

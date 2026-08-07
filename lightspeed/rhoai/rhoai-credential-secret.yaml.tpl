@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openai-credential
+  name: rhoai-credential
   namespace: openshift-lightspeed
 type: Opaque
 stringData:
-  apitoken: ${OPENAI_API_KEY}
+  apitoken: ${RHOAI_API_KEY}

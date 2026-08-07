@@ -23,9 +23,9 @@ spec:
     disableContainerBuildCapabilities: false
     defaultComponents:
     - name: dev-tools
+      componentType: Container      # from https://catalog.redhat.com/en/software/containers/devspaces/udi-base-rhel10/68e980d6843057801e0f3432
       container:
-      # from https://catalog.redhat.com/en/software/containers/devspaces/udi-base-rhel10/68e980d6843057801e0f3432
-      - image: registry.access.redhat.com/devspaces/udi-base-rhel10:latest
+        image: registry.access.redhat.com/devspaces/udi-base-rhel10:latest
         memoryLimit: 8Gi
         memoryRequest: 1Gi
         cpuLimit: '1'

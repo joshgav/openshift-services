@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openshiftai-credential
+  name: aws-bedrock-credential
   namespace: openshift-lightspeed
 type: Opaque
 stringData:
-  apitoken: ${OPENSHIFT_OPENAI_API_KEY}
+  apitoken: ${AWS_BEDROCK_API_KEY}

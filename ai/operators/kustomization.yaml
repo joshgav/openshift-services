@@ -5,8 +5,8 @@ resources:
 - nvidia-gpu-operator.yaml
 - leaderworkerset.yaml
 - connectivitylink.yaml
-- rhods.yaml
 - coo.yaml
 - tempo.yaml
 - opentelemetry.yaml
 - cnpg.yaml
+- rhods.yaml

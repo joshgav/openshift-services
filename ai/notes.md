@@ -4,6 +4,8 @@
 - o11y - https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/managing_openshift_ai/managing-observability_managing-rhoai
 - how to use routes and avoid LoadBalancer - https://github.com/opendatahub-io/models-as-a-service/blob/main/docs/samples/gateway-patterns/clusterip-route-reencrypt/README.md
 
+- redhatai/ministral - `--max-model-len=147936`
+
 ## Tips
 
 Must be set on maas-default-gateway:
@@ -48,10 +50,21 @@ EOF
 ## Helpers
 
 ```bash
-base_url=https://maas.apps.ipi.aws.joshgav.com
+## for core LLMInferenceService
+base_url=https://ai.apps.ipi.aws.joshgav.com
+# model=redhat-gpt-oss-20b
 model=redhat-ministral
 url=${base_url}/llm/${model}
-subscription=ministral
+
+token=$(oc whoami -t)
+
+## for MaaS
+base_url=https://maas.apps.ipi.aws.joshgav.com
+# model=redhat-ministral
+model=redhat-gpt-oss-20b
+url=${base_url}/llm/${model}
+# subscription=ministral
+subscription=gpt-oss-20b
 
 response=$(curl -sSk \
   -H "Authorization: Bearer $(oc whoami -t)" \
@@ -65,6 +78,8 @@ echo "API key obtained: ${token:0:20}..."
 curl -sSk ${base_url}/maas-api/v1/models \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${token}" | jq
+
+## the following apply to any token
 
 curl ${url}/v1/models -H "Authorization: Bearer ${token}" | jq
 

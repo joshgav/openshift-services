@@ -3,7 +3,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: ministral
+  name: gpt-oss-20b
   namespace: llm
   labels:
     opendatahub.io/dashboard: 'true'
@@ -12,7 +12,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi
+      storage: 50Gi
   storageClassName: gp3-csi
   volumeMode: Filesystem
 ---
@@ -20,7 +20,7 @@ spec:
 kind: Job
 apiVersion: batch/v1
 metadata:
-  name: copy-llm-01
+  generateName: copy-llm-
   namespace: llm
 spec:
   template:
@@ -33,7 +33,7 @@ spec:
       volumes:
         - name: model
           persistentVolumeClaim:
-            claimName: ministral
+            claimName: gpt-oss-20b
       containers:
         - name: main
           command:
@@ -41,7 +41,7 @@ spec:
             - '-c'
           env:
             - name: HUGGINGFACE_REPO
-              value: RedHatAI/Ministral-3-3B-Instruct-2512
+              value: RedHatAI/gpt-oss-20b
           imagePullPolicy: Always
           volumeMounts:
             - name: model

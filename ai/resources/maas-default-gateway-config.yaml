@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maas-default-gateway-config
+  namespace: openshift-ingress
+data:
+  deployment: |
+    spec:
+      replicas: 3
+  horizontalPodAutoscaler: |
+    spec:
+      minReplicas: 2
+      maxReplicas: 4

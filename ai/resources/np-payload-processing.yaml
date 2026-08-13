@@ -1,0 +1,17 @@
+# see https://github.com/jharmison-redhat/openshift-setup/blob/main/charts/openshift-ai/templates/networkpolicy.yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: app-payload-processing-allow
+  namespace: openshift-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app: payload-processing
+  ingress:
+    - {}
+  egress:
+    - {}
+  policyTypes:
+    - Ingress
+    - Egress

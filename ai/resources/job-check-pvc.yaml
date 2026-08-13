@@ -1,0 +1,34 @@
+---
+kind: Job
+apiVersion: batch/v1
+metadata:
+  generateName: check-llm-
+  namespace: llm
+spec:
+  template:
+    metadata:
+      name: check-llm
+    spec:
+      # needed for multi-AZ EBS
+      nodeSelector:
+        topology.kubernetes.io/zone: us-east-2a
+      volumes:
+        - name: model
+          persistentVolumeClaim:
+            claimName: gpt-oss-20b-02
+      containers:
+        - name: main
+          command:
+            - /usr/bin/bash
+            - '-c'
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: model
+              mountPath: /tmp/model
+          image: 'registry.access.redhat.com/ubi10/ubi:latest'
+          args:
+            - |
+              echo "contents of /tmp/model"
+              ls -alh /tmp/model
+              du -h -d 1 /tmp/model
+      restartPolicy: Never

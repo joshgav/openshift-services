@@ -1,20 +1,28 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: openshift-ai-inference
+  name: maas-default-gateway
   namespace: openshift-ingress
+  annotations:
+    opendatahub.io/managed: "false"
+    security.opendatahub.io/authorino-tls-bootstrap: "true"
 spec:
   gatewayClassName: openshift-default
+  infrastructure:
+    parametersRef:
+      group: ''
+      kind: ConfigMap
+      name: maas-default-gateway-config
   listeners:
    - name: http
-     hostname: ai.apps.ipi.aws.joshgav.com
+     hostname: maas.apps.ipi.aws.joshgav.com
      port: 80
      protocol: HTTP
      allowedRoutes:
        namespaces:
          from: All
    - name: https
-     hostname: ai.apps.ipi.aws.joshgav.com
+     hostname: maas.apps.ipi.aws.joshgav.com
      port: 443
      protocol: HTTPS
      allowedRoutes:

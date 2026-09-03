@@ -5,14 +5,18 @@ metadata:
   namespace: redhat-ods-applications
 spec:
   dashboardConfig:
+    disableKServeMetrics: false
+    disableLMEval: false
+    disableModelCatalog: false
+    disableModelRegistry: false
     disableTracking: false
     genAiStudio: true
+    modelAsService: true
     observabilityDashboard: true
     vLLMDeploymentOnMaaS: true
-    maasAuthPolicies: true
     llmGatewayField: true
     mcpCatalog: true
-    modelAsService: true
+    externalModels: true
   hardwareProfileOrder: []
   notebookController:
     enabled: true

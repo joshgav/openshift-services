@@ -5,7 +5,8 @@ root_dir=$(cd ${this_dir}/../../.. && pwd)
 if [[ -e "${root_dir}/.env" ]]; then source "${root_dir}/.env"; fi
 if [[ -e "${this_dir}/.env" ]]; then source "${this_dir}/.env"; fi
 
-WORKER_REGEXP='-worker-'
+INFRA_NAME=$(oc get infrastructures.config.openshift.io cluster -o json | jq -r '.status.infrastructureName')
+WORKER_REGEXP="${INFRA_NAME}-worker-"
 for WORKER_MACHINESET in $(oc get machinesets.machine.openshift.io -n openshift-machine-api -oname | grep -e "${WORKER_REGEXP}")
 do
     echo "creating corresponding VM machineset for ${WORKER_MACHINESET}"

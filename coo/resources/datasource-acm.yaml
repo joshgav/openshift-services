@@ -1,0 +1,23 @@
+apiVersion: perses.dev/v1alpha2
+kind: PersesGlobalDatasource
+metadata:
+  name: acm-thanos
+spec:
+  config:
+    default: false
+    display:
+      name: 'ACM Thanos'
+    plugin:
+      kind: PrometheusDatasource
+      spec:
+        proxy:
+          kind: HTTPProxy
+          spec:
+            secret: thanos-querier-datasource-secret
+            url: https://rbac-query-proxy.open-cluster-management-observability.svc.cluster.local:8443
+  client:
+    tls:
+      caCert:
+        certPath: /ca/service-ca.crt
+        type: file
+      enable: true

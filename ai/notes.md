@@ -52,19 +52,20 @@ EOF
 ```bash
 ## for core LLMInferenceService
 base_url=https://ai.apps.ipi.aws.joshgav.com
-# model=redhat-gpt-oss-20b
-model=redhat-ministral
+model=redhat-gpt-oss-20b
 url=${base_url}/llm/${model}
 
 token=$(oc whoami -t)
 
 ## for MaaS
 base_url=https://maas.apps.ipi.aws.joshgav.com
-# model=redhat-ministral
+subscription=redhat-gpt-oss-20b
+# for classic path-based routing
 model=redhat-gpt-oss-20b
 url=${base_url}/llm/${model}
-# subscription=ministral
-subscription=gpt-oss-20b
+# or for body-based routing
+model=publishers/llm/models/redhat-gpt-oss-20b
+url=${base_url}
 
 response=$(curl -sSk \
   -H "Authorization: Bearer $(oc whoami -t)" \
@@ -99,6 +100,16 @@ curl -s ${url}/v1/chat/completions \
         \"messages\": [{\"role\": \"user\", \"content\": \"Can you help?\"}],
         \"stream\": \"true\"
     }" | jq
+
+curl -s ${url}/v1/chat/completions \
+    -H "Authorization: Bearer ${token}" \
+    -H "Content-Type: application/json" \
+    -d "{
+        \"model\": \"${model}\",
+        \"messages\": [{\"role\": \"user\", \"content\": \"Can you help?\"}],
+        \"stream\": true,
+        \"stream_options\": {\"include_usage\": true}
+    }"
 
 while true; do
     curl -s ${url}/v1/chat/completions \

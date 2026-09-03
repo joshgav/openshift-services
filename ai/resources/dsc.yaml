@@ -12,14 +12,14 @@ spec:
       managementState: Managed
     feastoperator:
       managementState: Removed
+    aigateway:
+      managementState: Managed
+      modelsAsAService:
+        managementState: Managed
     kserve:
       managementState: Managed
-      modelsAsService:
-        managementState: Managed
     kueue:
       managementState: Removed
-    llamastackoperator:
-      managementState: Managed
     modelregistry:
       managementState: Managed
     ray:
@@ -27,8 +27,10 @@ spec:
     trainingoperator:
       managementState: Removed
     trustyai:
-      managementState: Removed
+      managementState: Managed
     workbenches:
       managementState: Managed
     mlflowoperator:
+      managementState: Managed
+    ogx:
       managementState: Managed

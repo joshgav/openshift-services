@@ -6,4 +6,4 @@ metadata:
 spec:
   modelRef:
     kind: ExternalModel
-    name: aws-gpt-oss-120b
+    name: openai.gpt-oss-120b

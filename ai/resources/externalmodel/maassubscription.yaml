@@ -1,0 +1,16 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: aws-gpt-oss-120b
+  namespace: models-as-a-service
+spec:
+  owner:
+    groups:
+      - name: system:authenticated
+    users: []
+  modelRefs:
+    - name: aws-gpt-oss-120b
+      namespace: llm
+      tokenRateLimits:
+        - limit: 1000000
+          window: 1m

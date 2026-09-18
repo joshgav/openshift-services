@@ -1,0 +1,16 @@
+# oc create secret generic bedrock-api-key --from-literal api-key="${bedrock_key}" -n llm
+### oc label secret bedrock-api-key -n llm inference.networking.k8s.io/bbr-managed=true
+# oc label secret bedrock-api-key -n llm inference.llm-d.ai/ipp-managed=true
+---
+apiVersion: inference.opendatahub.io/v1alpha1
+kind: ExternalProvider
+metadata:
+  name: bedrock
+  namespace: llm
+spec:
+  provider: bedrock-openai
+  endpoint: bedrock-mantle.us-east-2.api.aws
+  auth:
+    type: apikey
+    secretRef:
+      name: bedrock-api-key

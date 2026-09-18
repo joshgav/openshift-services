@@ -8,5 +8,6 @@ resources:
 - coo.yaml
 - tempo.yaml
 - opentelemetry.yaml
+- loki.yaml
 - cnpg.yaml
 - rhods.yaml

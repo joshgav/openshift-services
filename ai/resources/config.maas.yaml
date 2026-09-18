@@ -1,0 +1,9 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: Config
+metadata:
+  annotations:
+    maas.opendatahub.io/default-aitenant-bootstrapped: 'true'
+  name: default
+spec:
+  limitadorScrapeInterval: 30s
+  usageLogging: true

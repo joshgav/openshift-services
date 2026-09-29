@@ -1,0 +1,21 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: ScanSettingBinding
+metadata:
+  name: first
+  namespace: openshift-compliance
+profiles:
+  # Node checks
+  - name: ocp4-high-node
+    kind: Profile
+    apiGroup: compliance.openshift.io/v1alpha1
+  - name: rhcos4-high
+    kind: Profile
+    apiGroup: compliance.openshift.io/v1alpha1
+  # Cluster checks
+  - name: ocp4-high
+    kind: Profile
+    apiGroup: compliance.openshift.io/v1alpha1
+settingsRef:
+  name: first
+  kind: ScanSetting
+  apiGroup: compliance.openshift.io/v1alpha1

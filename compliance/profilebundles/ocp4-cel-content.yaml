@@ -1,0 +1,1220 @@
+profiles:
+- id: cis-vm-extension
+  name: cis-vm-extension
+  title: CIS Red Hat Openshift Virtual Machine Extension Benchmark
+  description: 'This profile defines a baseline that aligns to the Center for Internet
+    Security®
+
+    Red Hat OpenShift Virtual Machine Extension Benchmark™, V1.0.0.
+
+
+    This profile includes Center for Internet Security®
+
+    Red Hat OpenShift Virtual Machine Extension Benchmarks™ content.
+
+
+    Note that this part of the profile is meant to run on the Platform that
+
+    Red Hat OpenShift Container Platform runs on top of.'
+  productType: Platform
+  rules:
+  - kubevirt-bridge-mac-spoof-filtering
+  - kubevirt-disable-intel-txt
+  - kubevirt-disk-error-policy-not-ignore
+  - kubevirt-downward-metrics-disabled
+  - kubevirt-enforce-trusted-tls-registries
+  - kubevirt-ksm-disabled
+  - kubevirt-localnet-vlan-required
+  - kubevirt-no-jsonpatch-annotations
+  - kubevirt-no-permitted-host-devices
+  - kubevirt-no-shareable-disks
+  - kubevirt-no-vm-device-passthrough
+  - kubevirt-no-vms-overcommitting-guest-memory
+  - kubevirt-nonroot-feature-gate-is-enabled
+  - kubevirt-persistent-reservation-disabled
+  - kubevirt-restrict-cross-datavolume-cloning
+  - kubevirt-restrict-exec-access-to-pods
+  - kubevirt-restrict-migration-tools-access
+  - kubevirt-restrict-update-access-to-cdi-cr
+  - kubevirt-restrict-vm-cluster-instance-preference-types
+  - kubevirt-restrict-vnc-access-to-workloads
+  - kubevirt-sriov-spoofchk-on
+  - kubevirt-sriov-vlan-required
+  - kubevirt-use-multi-network-policies
+- id: stig-vm-extension-v2r6
+  name: stig-vm-extension-v2r6
+  title: DISA STIG for Red Hat OpenShift Container Platform 4 - Virtualization Extension
+  description: 'This profile contains CEL-based checks for OpenShift Virtualization
+
+    that align to the DISA STIG for Red Hat OpenShift Container Platform 4.'
+  productType: Platform
+  rules:
+  - kubevirt-bridge-mac-spoof-filtering
+  - kubevirt-disk-error-policy-not-ignore
+  - kubevirt-downward-metrics-disabled
+  - kubevirt-ksm-disabled
+  - kubevirt-no-jsonpatch-annotations
+  - kubevirt-no-permitted-host-devices
+  - kubevirt-no-shareable-disks
+  - kubevirt-nonroot-feature-gate-is-enabled
+  - kubevirt-persistent-reservation-disabled
+  - kubevirt-restrict-migration-tools-access
+  - kubevirt-restrict-vnc-access-to-workloads
+  - kubevirt-sriov-spoofchk-on
+- id: stig-vm-extension
+  name: stig-vm-extension
+  title: DISA STIG for Red Hat OpenShift Container Platform 4 - Virtualization Extension
+  description: 'This profile contains CEL-based checks for OpenShift Virtualization
+
+    that align to the DISA STIG for Red Hat OpenShift Container Platform 4.'
+  productType: Platform
+  rules:
+  - kubevirt-bridge-mac-spoof-filtering
+  - kubevirt-disk-error-policy-not-ignore
+  - kubevirt-downward-metrics-disabled
+  - kubevirt-ksm-disabled
+  - kubevirt-no-jsonpatch-annotations
+  - kubevirt-no-permitted-host-devices
+  - kubevirt-no-shareable-disks
+  - kubevirt-nonroot-feature-gate-is-enabled
+  - kubevirt-persistent-reservation-disabled
+  - kubevirt-restrict-migration-tools-access
+  - kubevirt-restrict-vnc-access-to-workloads
+  - kubevirt-sriov-spoofchk-on
+rules:
+- id: kubevirt-bridge-mac-spoof-filtering
+  name: kubevirt-bridge-mac-spoof-filtering
+  title: Bridge Network Attachments Must Enable MAC Spoof Filtering
+  description: 'Bridge-type NetworkAttachmentDefinitions must set ''macspoofchk: true''
+
+    in their CNI configuration so the bridge drops frames whose source MAC
+
+    differs from the address assigned to the interface. Without it, a
+
+    compromised guest can impersonate other workloads or infrastructure at
+
+    layer 2 (ARP spoofing, man-in-the-middle).'
+  rationale: 'Layer-2 identity is the basis for switching decisions on secondary
+
+    networks. A guest that can spoof MAC addresses can intercept or
+
+    redirect other workloads'' traffic on the same segment.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command:
+
+    <pre>$ oc get network-attachment-definitions -A -o jsonpath=''{range .items[*]}{.metadata.name}:
+    {.spec.config}{"\n"}{end}''</pre>
+
+    Every config with ''"type":"bridge"'' should set ''"macspoofchk": true''.'
+  failureReason: 'One or more bridge NetworkAttachmentDefinitions do not set
+
+    ''macspoofchk: true'' in their CNI configuration, allowing guests to
+
+    spoof layer-2 identities.'
+  expression: "nads.items.all(n,\n    !has(n.spec) ||\n    !has(n.spec.config) ||\n\
+    \    n.spec.config == \"\" ||\n    !(\"type\" in parseJSON(n.spec.config)) ||\n\
+    \    parseJSON(n.spec.config).type != \"bridge\" ||\n    (\"macspoofchk\" in parseJSON(n.spec.config)\
+    \ && parseJSON(n.spec.config).macspoofchk == true)\n)"
+  inputs:
+  - name: nads
+    kubernetesInputSpec:
+      apiVersion: k8s.cni.cncf.io/v1
+      resource: network-attachment-definitions
+  controls:
+    stigid:
+    - CNTR-OS-000100
+    stigref:
+    - SV-257514r1208195_rule
+    stigref_vulnerability_id:
+    - V-257514
+- id: kubevirt-disable-intel-txt
+  name: kubevirt-disable-intel-txt
+  title: Disable Intel Trusted Execution Technology (TXT)
+  description: 'Intel Trusted Execution Technology (TXT) should be disabled in the
+
+    host BIOS/firmware settings. TXT provides hardware-based memory
+
+    protection through a Measured Launch Environment, but it can
+
+    conflict with virtualization workloads and introduce compatibility
+
+    issues with certain hypervisor configurations. In environments
+
+    where TXT is not actively used for measured launch, leaving it
+
+    enabled adds unnecessary complexity without a corresponding
+
+    security benefit.'
+  rationale: 'TXT can interfere with virtualization features and introduce
+
+    unexpected behavior during host boot and workload scheduling.
+
+    When TXT is not part of the security architecture, disabling it
+
+    reduces the attack surface associated with the TXT firmware
+
+    interface and avoids potential conflicts with the hypervisor
+
+    and virtual machine management stack.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command on each cluster node to check the
+
+    Intel TXT BIOS setting:
+
+    <pre>$ fwupdmgr get-bios-settings</pre>
+
+    Look for the TxT setting and ensure its current value is
+
+    <tt>Disabled</tt>.'
+- id: kubevirt-disk-error-policy-not-ignore
+  name: kubevirt-disk-error-policy-not-ignore
+  title: Virtual Machine Disks Must Not Ignore I/O Errors
+  description: 'A disk with ''errorPolicy: ignore'' tells the hypervisor to suppress
+    I/O
+
+    errors instead of reporting or stopping on them. Ignored storage errors
+
+    lead to silent data corruption inside the guest, masking hardware
+
+    failures and tampering. The default (report) or ''stop'' should be used.'
+  rationale: 'Suppressed I/O errors deny the guest and the platform the signal needed
+
+    to fail over, alert or stop on storage corruption - undermining data
+
+    integrity guarantees for the workload.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to list disks that ignore I/O errors:
+
+    <pre>$ oc get vm -A -o jsonpath=''{range .items[*]}{.metadata.namespace}/{.metadata.name}:
+    {.spec.template.spec.domain.devices.disks[?(@.errorPolicy=="ignore")].name}{"\n"}{end}''</pre>
+
+    No virtual machine disk should set errorPolicy to ignore.'
+  failureReason: 'One or more ''VirtualMachine'' resources have a disk with
+
+    ''.errorPolicy'' set to "ignore", suppressing I/O errors and risking
+
+    silent data corruption.'
+  expression: "vms.items.all(v,\n    !has(v.spec.template.spec.domain.devices) ||\n\
+    \    !has(v.spec.template.spec.domain.devices.disks) ||\n    v.spec.template.spec.domain.devices.disks.all(d,\n\
+    \      !has(d.errorPolicy) || d.errorPolicy != \"ignore\"\n    )\n)"
+  inputs:
+  - name: vms
+    kubernetesInputSpec:
+      apiVersion: kubevirt.io/v1
+      resource: virtualmachines
+  controls:
+    stigid:
+    - CNTR-OS-000150
+    stigref:
+    - SV-257517r1208201_rule
+    stigref_vulnerability_id:
+    - V-257517
+- id: kubevirt-downward-metrics-disabled
+  name: kubevirt-downward-metrics-disabled
+  title: KubeVirt downwardMetrics Feature Gate Must Be Disabled
+  description: 'The <tt>downwardMetrics</tt> feature gate exposes host metrics to
+    virtual
+
+    machine guests through a virtio-serial channel or disk. Exposing host
+
+    performance metrics inside guests leaks information about the underlying
+
+    node and co-located workloads, which can assist an attacker in host
+
+    fingerprinting and side-channel planning. Unless a workload specifically
+
+    requires it, the feature gate should remain disabled.'
+  rationale: 'When <tt>.spec.featureGates.downwardMetrics</tt> is enabled in the
+
+    <tt>kubevirt-hyperconverged</tt> resource, every guest that requests a
+
+    downwardMetrics device can read host-level metrics. Keeping the gate
+
+    disabled preserves the isolation boundary between guests and the host.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check the feature gate configuration:
+
+    <pre>$ oc get hyperconverged kubevirt-hyperconverged -n openshift-cnv -o jsonpath=''{.spec.featureGates.downwardMetrics}''</pre>
+
+    The output should be <tt>false</tt> or empty.'
+  failureReason: 'The ''.spec.featureGates.downwardMetrics'' field is set to ''true''
+    in the
+
+    ''kubevirt-hyperconverged'' resource, exposing host metrics to virtual
+
+    machine guests.'
+  expression: "hcoList.items.filter(h,\n    h.metadata.name == 'kubevirt-hyperconverged'\
+    \ &&\n    h.metadata.namespace == 'openshift-cnv'\n).size() == 1 &&\nhcoList.items.filter(h,\n\
+    \    h.metadata.name == 'kubevirt-hyperconverged' &&\n    h.metadata.namespace\
+    \ == 'openshift-cnv'\n).all(h,\n    !has(h.spec.featureGates) ||\n    !has(h.spec.featureGates.downwardMetrics)\
+    \ ||\n    h.spec.featureGates.downwardMetrics == false\n)"
+  inputs:
+  - name: hcoList
+    kubernetesInputSpec:
+      apiVersion: hco.kubevirt.io/v1beta1
+      resource: hyperconvergeds
+  controls:
+    stigid:
+    - CNTR-OS-000110
+    stigref:
+    - SV-257515r1208198_rule
+    stigref_vulnerability_id:
+    - V-257515
+- id: kubevirt-enforce-trusted-tls-registries
+  name: kubevirt-enforce-trusted-tls-registries
+  title: Only Trusted Registries Using TLS Can Be Used
+  description: 'By only pulling container images from trusted registries using TLS,
+    organizations
+
+    can reduce the risk of introducing unknown vulnerabilities or malicious
+
+    software into their systems. This helps ensure that their applications and systems
+
+    remain secure and stable. All container image registries used by KubeVirt should
+
+    require TLS connections to protect the integrity and authenticity of images.'
+  rationale: 'When the <tt>.spec.storageImport.insecureRegistries</tt> field contains
+    entries in
+
+    the <tt>kubevirt-hyperconverged</tt> resource, KubeVirt is configured to allow
+
+    connections to container registries that do not use TLS encryption. This creates
+
+    a significant security risk as images could be intercepted or tampered with during
+
+    transit. Man-in-the-middle attacks could result in malicious images being pulled
+
+    and executed within virtual machines. To maintain security, only registries using
+
+    TLS should be permitted, and the insecureRegistries list should be empty.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check for insecure registries:
+
+    <pre>$ oc get hyperconverged kubevirt-hyperconverged -n openshift-cnv -o jsonpath=''{.spec.storageImport.insecureRegistries}''</pre>
+
+    The output should be empty or the field should not exist.'
+  failureReason: 'There are registries not using TLS in ''.spec.storageImport.insecureRegistries''
+    in
+
+    the ''kubevirt-hyperconverged'' resource.'
+  expression: '!has(hco.spec.storageImport) ||
+
+    !has(hco.spec.storageImport.insecureRegistries) ||
+
+    hco.spec.storageImport.insecureRegistries.size() == 0'
+  inputs:
+  - name: hco
+    kubernetesInputSpec:
+      apiVersion: hco.kubevirt.io/v1beta1
+      resource: hyperconvergeds
+      resourceName: kubevirt-hyperconverged
+      resourceNamespace: openshift-cnv
+- id: kubevirt-ksm-disabled
+  name: kubevirt-ksm-disabled
+  title: Kernel Samepage Merging (KSM) Must Be Disabled
+  description: 'Kernel Samepage Merging (KSM) deduplicates identical memory pages
+    across
+
+    virtual machines on a node. While it saves memory, KSM is a well-known
+
+    side-channel vector: co-located guests can infer each other''s memory
+
+    contents through page-deduplication timing attacks. KSM is disabled by
+
+    default and should stay disabled on hosts running untrusted or
+
+    multi-tenant workloads.
+
+
+    The HyperConverged operator serves an empty
+
+    <tt>.spec.ksmConfiguration</tt> (<tt>{}</tt>) by default, which does NOT
+
+    enable KSM (verified against the node''s
+
+    <tt>/sys/kernel/mm/ksm/run</tt>). KSM is enabled by configuring a
+
+    <tt>nodeLabelSelector</tt>; this check fails only when a node selector is
+
+    configured.'
+  rationale: 'Memory deduplication across tenant boundaries allows an attacker in
+    one
+
+    virtual machine to detect, via write-timing differences, whether a page
+
+    with known content exists in another virtual machine on the same node -
+
+    breaking confidentiality between workloads.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check the KSM configuration:
+
+    <pre>$ oc get hyperconverged kubevirt-hyperconverged -n openshift-cnv -o jsonpath=''{.spec.ksmConfiguration}''</pre>
+
+    The output should be empty or <tt>{}</tt> (no nodeLabelSelector
+
+    configured).'
+  failureReason: 'The ''.spec.ksmConfiguration'' field in the ''kubevirt-hyperconverged''
+
+    resource configures a nodeLabelSelector, enabling Kernel Samepage Merging
+
+    on the selected nodes.'
+  expression: "hcoList.items.filter(h,\n    h.metadata.name == 'kubevirt-hyperconverged'\
+    \ &&\n    h.metadata.namespace == 'openshift-cnv'\n).size() == 1 &&\nhcoList.items.filter(h,\n\
+    \    h.metadata.name == 'kubevirt-hyperconverged' &&\n    h.metadata.namespace\
+    \ == 'openshift-cnv'\n).all(h,\n    !has(h.spec.ksmConfiguration) ||\n    h.spec.ksmConfiguration\
+    \ == null ||\n    size(h.spec.ksmConfiguration) == 0\n)"
+  inputs:
+  - name: hcoList
+    kubernetesInputSpec:
+      apiVersion: hco.kubevirt.io/v1beta1
+      resource: hyperconvergeds
+  controls:
+    stigid:
+    - CNTR-OS-000560
+    stigref:
+    - SV-257548r1156737_rule
+    stigref_vulnerability_id:
+    - V-257548
+- id: kubevirt-localnet-vlan-required
+  name: kubevirt-localnet-vlan-required
+  title: Localnet Network Attachments Must Declare a Dedicated VLAN
+  description: 'NetworkAttachmentDefinitions with the OVN ''localnet'' topology bridge
+
+    virtual machine traffic onto the physical provider network. Such
+
+    attachments must declare a ''vlanID'' in their CNI configuration so the
+
+    traffic is segmented on a dedicated VLAN rather than the untagged
+
+    provider segment. Environments that intentionally use untagged provider
+
+    networks should tailor the profile to exclude this rule for those objects.'
+  rationale: 'Without VLAN segmentation, workloads attached to localnet networks
+
+    share a broadcast domain with other traffic, enabling lateral movement,
+
+    sniffing and spoofing between tenants and toward the infrastructure.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command:
+
+    <pre>$ oc get network-attachment-definitions -A -o jsonpath=''{range .items[*]}{.metadata.name}:
+    {.spec.config}{"\n"}{end}''</pre>
+
+    Every config with ''"topology":"localnet"'' should declare a non-zero vlanID.'
+  failureReason: 'One or more localnet NetworkAttachmentDefinitions do not declare
+    a
+
+    ''vlanID'' in their CNI configuration, leaving virtual machine traffic on
+
+    the untagged provider segment.'
+  expression: "nads.items.all(n,\n    !has(n.spec) ||\n    !has(n.spec.config) ||\n\
+    \    n.spec.config == \"\" ||\n    !(\"topology\" in parseJSON(n.spec.config))\
+    \ ||\n    parseJSON(n.spec.config).topology != \"localnet\" ||\n    (\"vlanID\"\
+    \ in parseJSON(n.spec.config) && parseJSON(n.spec.config).vlanID > 0)\n)"
+  inputs:
+  - name: nads
+    kubernetesInputSpec:
+      apiVersion: k8s.cni.cncf.io/v1
+      resource: network-attachment-definitions
+- id: kubevirt-no-jsonpatch-annotations
+  name: kubevirt-no-jsonpatch-annotations
+  title: HyperConverged Resource Must Not Carry Unsupported JSON-Patch Annotations
+  description: 'OpenShift Virtualization supports jsonpatch annotations
+
+    (<tt>kubevirt.kubevirt.io/jsonpatch</tt>,
+
+    <tt>containerizeddataimporter.kubevirt.io/jsonpatch</tt>,
+
+    <tt>networkaddonsconfigs.kubevirt.io/jsonpatch</tt> and
+
+    <tt>ssp.kubevirt.io/jsonpatch</tt>) that patch the operand custom
+
+    resources directly, bypassing the supported HyperConverged API surface.
+
+    Such patches are unsupported, are not validated, can silently disable
+
+    security-relevant settings, and survive upgrades unnoticed.
+
+
+    Environments with an authorized, documented need for a jsonpatch
+
+    should tailor the profile to exclude this rule.'
+  rationale: 'Direct patches to the KubeVirt, CDI, network-addons or SSP operands
+
+    circumvent the configuration controls and validation the HyperConverged
+
+    operator provides, creating undocumented configuration drift that may
+
+    weaken the virtualization platform''s security posture.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check for jsonpatch annotations:
+
+    <pre>$ oc get hyperconverged kubevirt-hyperconverged -n openshift-cnv -o jsonpath=''{.metadata.annotations}''</pre>
+
+    None of the following keys should be present:
+
+    <tt>kubevirt.kubevirt.io/jsonpatch</tt>,
+
+    <tt>containerizeddataimporter.kubevirt.io/jsonpatch</tt>,
+
+    <tt>networkaddonsconfigs.kubevirt.io/jsonpatch</tt>,
+
+    <tt>ssp.kubevirt.io/jsonpatch</tt>.'
+  failureReason: 'The ''kubevirt-hyperconverged'' resource carries one or more jsonpatch
+
+    annotations - kubevirt.kubevirt.io/jsonpatch,
+
+    containerizeddataimporter.kubevirt.io/jsonpatch,
+
+    networkaddonsconfigs.kubevirt.io/jsonpatch or ssp.kubevirt.io/jsonpatch -
+
+    patching operand resources outside the supported API.'
+  expression: "hcoList.items.filter(h,\n    h.metadata.name == 'kubevirt-hyperconverged'\
+    \ &&\n    h.metadata.namespace == 'openshift-cnv'\n).size() == 1 &&\nhcoList.items.filter(h,\n\
+    \    h.metadata.name == 'kubevirt-hyperconverged' &&\n    h.metadata.namespace\
+    \ == 'openshift-cnv'\n).all(h,\n    !has(h.metadata.annotations) || (\n      !(\"\
+    kubevirt.kubevirt.io/jsonpatch\" in h.metadata.annotations) &&\n      !(\"containerizeddataimporter.kubevirt.io/jsonpatch\"\
+    \ in h.metadata.annotations) &&\n      !(\"networkaddonsconfigs.kubevirt.io/jsonpatch\"\
+    \ in h.metadata.annotations) &&\n      !(\"ssp.kubevirt.io/jsonpatch\" in h.metadata.annotations)\n\
+    \    )\n)"
+  inputs:
+  - name: hcoList
+    kubernetesInputSpec:
+      apiVersion: hco.kubevirt.io/v1beta1
+      resource: hyperconvergeds
+  controls:
+    stigid:
+    - CNTR-OS-000740
+    stigref:
+    - SV-257561r1156740_rule
+    stigref_vulnerability_id:
+    - V-257561
+- id: kubevirt-no-permitted-host-devices
+  name: kubevirt-no-permitted-host-devices
+  title: KubeVirt Must Not Permit Host Devices
+  description: 'Host devices should not be permitted to virtualization workloads unless
+
+    absolutely necessary for workload execution. Allowing host devices provides
+
+    direct access to host hardware, which can introduce security risks including
+
+    unauthorized access to sensitive hardware resources, potential for privilege
+
+    escalation, and bypass of virtualization security boundaries.
+
+
+    By default, no host devices should be trusted or permitted for use by
+
+    virtualization workloads.'
+  rationale: 'The <tt>.spec.permittedHostDevices</tt> field in the <tt>kubevirt-hyperconverged</tt>
+
+    resource controls which host devices can be used by virtualization workloads.
+
+    Permitting host devices allows virtual machines to bypass virtualization boundaries
+
+    and directly access host hardware, which introduces significant security risks.
+
+    This can lead to unauthorized access to sensitive hardware resources, privilege
+
+    escalation opportunities, and potential compromise of the host system. Unless
+
+    explicitly required, no host devices should be permitted.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check the HyperConverged configuration:
+
+    <pre>$ oc get hyperconverged kubevirt-hyperconverged -n openshift-cnv -o jsonpath=''{.spec.permittedHostDevices}''</pre>
+
+    The output should be empty or show empty lists for both <tt>pciHostDevices</tt>
+    and <tt>mediatedDevices</tt>.'
+  failureReason: 'The ''.spec.permittedHostDevices'' field in the ''kubevirt-hyperconverged''
+
+    resource permits one or more host devices (pciHostDevices, mediatedDevices
+
+    or usbHostDevices) to be used by virtualization workloads.'
+  expression: "hcoList.items.filter(h,\n    h.metadata.name == 'kubevirt-hyperconverged'\
+    \ &&\n    h.metadata.namespace == 'openshift-cnv'\n).size() == 1 &&\nhcoList.items.filter(h,\n\
+    \    h.metadata.name == 'kubevirt-hyperconverged' &&\n    h.metadata.namespace\
+    \ == 'openshift-cnv'\n).all(h,\n    !has(h.spec.permittedHostDevices) ||\n   \
+    \ h.spec.permittedHostDevices == null ||\n    (\n      (!has(h.spec.permittedHostDevices.pciHostDevices)\
+    \ || size(h.spec.permittedHostDevices.pciHostDevices) == 0) &&\n      (!has(h.spec.permittedHostDevices.mediatedDevices)\
+    \ || size(h.spec.permittedHostDevices.mediatedDevices) == 0) &&\n      (!has(h.spec.permittedHostDevices.usbHostDevices)\
+    \ || size(h.spec.permittedHostDevices.usbHostDevices) == 0)\n    )\n)"
+  inputs:
+  - name: hcoList
+    kubernetesInputSpec:
+      apiVersion: hco.kubevirt.io/v1beta1
+      resource: hyperconvergeds
+  controls:
+    stigid:
+    - CNTR-OS-001020
+    stigref:
+    - SV-257584r1208209_rule
+    stigref_vulnerability_id:
+    - V-257584
+- id: kubevirt-no-shareable-disks
+  name: kubevirt-no-shareable-disks
+  title: Virtual Machine Disks Must Not Be Shareable
+  description: 'A disk marked ''shareable: true'' may be attached to multiple virtual
+
+    machines concurrently. Shared writable disks bypass the isolation
+
+    between workloads: one guest can tamper with data another guest reads,
+
+    and concurrent writers without cluster-aware filesystems corrupt data.
+
+    Disks should not be shareable unless a reviewed clustered workload
+
+    requires it.'
+  rationale: 'Every disk with ''.shareable == true'' creates a data path between
+
+    virtual machines that circumvents network controls and namespace
+
+    isolation, enabling tampering and data corruption across workloads.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to list shareable disks:
+
+    <pre>$ oc get vm -A -o jsonpath=''{range .items[*]}{.metadata.namespace}/{.metadata.name}:
+    {.spec.template.spec.domain.devices.disks[?(@.shareable==true)].name}{"\n"}{end}''</pre>
+
+    No virtual machine should list a shareable disk.'
+  failureReason: 'One or more ''VirtualMachine'' resources have a disk with
+
+    ''.shareable'' set to "true", allowing the disk to be attached to multiple
+
+    virtual machines concurrently.'
+  expression: "vms.items.all(v,\n    !has(v.spec.template.spec.domain.devices) ||\n\
+    \    !has(v.spec.template.spec.domain.devices.disks) ||\n    v.spec.template.spec.domain.devices.disks.all(d,\n\
+    \      !has(d.shareable) || d.shareable == false\n    )\n)"
+  inputs:
+  - name: vms
+    kubernetesInputSpec:
+      apiVersion: kubevirt.io/v1
+      resource: virtualmachines
+  controls:
+    stigid:
+    - CNTR-OS-000560
+    stigref:
+    - SV-257548r1156737_rule
+    stigref_vulnerability_id:
+    - V-257548
+- id: kubevirt-no-vm-device-passthrough
+  name: kubevirt-no-vm-device-passthrough
+  title: Virtual Machines Must Not Pass Through GPUs or Host Devices
+  description: 'Passing host devices (GPUs, PCI or USB devices) through to a virtual
+
+    machine gives the guest direct access to host hardware, bypassing the
+
+    hypervisor''s isolation. A compromised guest with device passthrough can
+
+    attack the host through the device (DMA, firmware) far more easily than
+
+    through the virtualized surface. Only explicitly approved workloads
+
+    should use passthrough; any use must be reviewed.'
+  rationale: 'Every ''.spec.template.spec.domain.devices.gpus'' or
+
+    ''.spec.template.spec.domain.devices.hostDevices'' entry on a
+
+    VirtualMachine widens the guest''s reach into host hardware and weakens
+
+    the isolation boundary that virtualization provides.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to list virtual machines requesting device
+
+    passthrough:
+
+    <pre>$ oc get vm -A -o jsonpath=''{range .items[*]}{.metadata.namespace}/{.metadata.name}:
+    gpus={.spec.template.spec.domain.devices.gpus} hostDevices={.spec.template.spec.domain.devices.hostDevices}{"\n"}{end}''</pre>
+
+    No virtual machine should list gpus or hostDevices entries.'
+  failureReason: 'One or more ''VirtualMachine'' resources request GPU or host-device
+
+    passthrough (''.spec.template.spec.domain.devices.gpus'' or
+
+    ''.spec.template.spec.domain.devices.hostDevices''), giving guests direct
+
+    access to host hardware.'
+  expression: "vms.items.all(v,\n    (!has(v.spec.template.spec.domain.devices) ||\
+    \ (\n      (!has(v.spec.template.spec.domain.devices.gpus) || size(v.spec.template.spec.domain.devices.gpus)\
+    \ == 0) &&\n      (!has(v.spec.template.spec.domain.devices.hostDevices) || size(v.spec.template.spec.domain.devices.hostDevices)\
+    \ == 0)\n    ))\n)"
+  inputs:
+  - name: vms
+    kubernetesInputSpec:
+      apiVersion: kubevirt.io/v1
+      resource: virtualmachines
+- id: kubevirt-no-vms-overcommitting-guest-memory
+  name: kubevirt-no-vms-overcommitting-guest-memory
+  title: VMs Must Not Overcommit Guest Memory
+  description: 'The <tt>overcommitGuestOverhead</tt> configuration option enables
+    the request for
+
+    additional virtual machine management memory inside the virt-launcher pod.
+
+    The overcommit feature is used to increase virtual machine density on the
+
+    node, as long as the virtual machine doesn''t request all the memory that it
+
+    would need if fully loaded. However, if the VM were to use all of the
+
+    memory it could, this would lead to the OpenShift Scheduler killing the
+
+    workload.'
+  rationale: 'When the <tt>.spec.template.spec.domain.resources.overcommitGuestOverhead</tt>
+    field is
+
+    set to <tt>true</tt> in the <tt>VirtualMachine</tt> resource, VMs are allowed
+    to
+
+    overcommit KubeVirt''s memory which may lead to guests crashing and
+
+    interrupting workloads causing malfunctions. To prevent memory-related failures
+
+    and ensure workload stability, this setting should not be enabled.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check VirtualMachine configurations:
+
+    <pre>$ oc get virtualmachines -A -o jsonpath=''{range .items[*]}{.metadata.namespace}{"/"}{.metadata.name}{":
+    "}{.spec.template.spec.domain.resources.overcommitGuestOverhead}{"\n"}{end}''</pre>
+
+    Make sure no VirtualMachine has <tt>overcommitGuestOverhead</tt> set to <tt>true</tt>.'
+  failureReason: 'One or more ''VirtualMachine'' resources set
+
+    ''.spec.template.spec.domain.resources.overcommitGuestOverhead'' to "true",
+
+    allowing VMs to overcommit KubeVirt''s memory which may lead to guests
+
+    crashing and interrupting workloads causing malfunctions.'
+  expression: "vms.items.all(v,\n    !has(v.spec.template.spec.domain.resources) ||\n\
+    \    !has(v.spec.template.spec.domain.resources.overcommitGuestOverhead) ||\n\
+    \    v.spec.template.spec.domain.resources.overcommitGuestOverhead == false\n)"
+  inputs:
+  - name: vms
+    kubernetesInputSpec:
+      apiVersion: kubevirt.io/v1
+      resource: virtualmachines
+- id: kubevirt-nonroot-feature-gate-is-enabled
+  name: kubevirt-nonroot-feature-gate-is-enabled
+  title: KubeVirt nonRoot Feature Gate Must Be Enabled
+  description: 'The <tt>nonRoot</tt> feature gate in KubeVirt enables restrictions
+    that prevent
+
+    virtual machines from running with root privileges. This feature enforces
+
+    security boundaries and helps prevent privilege escalation attacks. All virtual
+
+    machines should operate with the minimum necessary privileges, and the nonRoot
+
+    feature gate ensures this principle is enforced at the platform level.'
+  rationale: 'Unauthorized access to a root account without restrictions implemented
+    by
+
+    the nonRoot feature introduces the risk of unintended or unauthorized
+
+    access to privilege elevation and the ability to perform administrative
+
+    tasks. When the <tt>.spec.featureGates.nonRoot</tt> field is set to <tt>true</tt>
+
+    in the <tt>kubevirt-hyperconverged</tt> resource, KubeVirt enforces non-root
+
+    execution for virtual machine workloads, significantly reducing the attack
+
+    surface and limiting the potential impact of security vulnerabilities.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check the feature gate configuration:
+
+    <pre>$ oc get hyperconverged kubevirt-hyperconverged -n openshift-cnv -o jsonpath=''{.spec.featureGates.nonRoot}''</pre>
+
+    The output should be <tt>true</tt> or empty. On OpenShift Virtualization
+
+    4.18 and later the field has been removed and non-root execution is always
+
+    enforced, so an empty output is compliant.'
+  failureReason: 'The ''.spec.featureGates.nonRoot'' field is present and not set
+    to ''true'' in
+
+    the ''kubevirt-hyperconverged'' resource. On OpenShift Virtualization 4.18
+
+    and later the field is removed and non-root execution is always enforced,
+
+    so an absent field is compliant.'
+  expression: "hcoList.items.filter(h,\n    h.metadata.name == 'kubevirt-hyperconverged'\
+    \ &&\n    h.metadata.namespace == 'openshift-cnv'\n).size() == 1 &&\nhcoList.items.filter(h,\n\
+    \    h.metadata.name == 'kubevirt-hyperconverged' &&\n    h.metadata.namespace\
+    \ == 'openshift-cnv'\n).all(h,\n    !has(h.spec.featureGates) ||\n    !has(h.spec.featureGates.nonRoot)\
+    \ ||\n    h.spec.featureGates.nonRoot == true\n)"
+  inputs:
+  - name: hcoList
+    kubernetesInputSpec:
+      apiVersion: hco.kubevirt.io/v1beta1
+      resource: hyperconvergeds
+  controls:
+    stigid:
+    - CNTR-OS-000400
+    stigref:
+    - SV-257540r1156731_rule
+    stigref_vulnerability_id:
+    - V-257540
+- id: kubevirt-persistent-reservation-disabled
+  name: kubevirt-persistent-reservation-disabled
+  title: KubeVirt Persistent Reservation Feature Gate Must Be Disabled
+  description: 'The persistent reservation feature gate in KubeVirt allows virtual
+    machines
+
+    to use SCSI persistent reservations, which provide exclusive access to shared
+
+    storage. This feature should be disabled unless explicitly required for
+
+    workload operation, as it can introduce security risks by allowing VMs to
+
+    claim exclusive access to storage resources, potentially impacting availability
+
+    and enabling resource manipulation outside normal access controls.'
+  rationale: 'The <tt>.spec.featureGates.persistentReservation</tt> field in the
+
+    <tt>kubevirt-hyperconverged</tt> resource controls whether virtual machines can
+
+    use SCSI persistent reservations. When enabled, this feature allows VMs to claim
+
+    exclusive access to shared storage resources, which can be exploited to cause
+
+    denial of service conditions or manipulate storage access in ways that bypass
+
+    normal Kubernetes access controls. Unless this capability is explicitly required
+
+    for specific workload requirements, it should remain disabled to minimize the
+
+    attack surface.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check the feature gate configuration:
+
+    <pre>$ oc get hyperconverged kubevirt-hyperconverged -n openshift-cnv -o jsonpath=''{.spec.featureGates.persistentReservation}''</pre>
+
+    The output should be <tt>false</tt>.'
+  failureReason: 'The ''.spec.featureGates.persistentReservation'' field is set to
+    ''true'' in
+
+    the ''kubevirt-hyperconverged'' resource. An absent field is compliant
+
+    because persistent reservations are disabled by default.'
+  expression: "hcoList.items.filter(h,\n    h.metadata.name == 'kubevirt-hyperconverged'\
+    \ &&\n    h.metadata.namespace == 'openshift-cnv'\n).size() == 1 &&\nhcoList.items.filter(h,\n\
+    \    h.metadata.name == 'kubevirt-hyperconverged' &&\n    h.metadata.namespace\
+    \ == 'openshift-cnv'\n).all(h,\n    !has(h.spec.featureGates) ||\n    !has(h.spec.featureGates.persistentReservation)\
+    \ ||\n    h.spec.featureGates.persistentReservation == false\n)"
+  inputs:
+  - name: hcoList
+    kubernetesInputSpec:
+      apiVersion: hco.kubevirt.io/v1beta1
+      resource: hyperconvergeds
+  controls:
+    stigid:
+    - CNTR-OS-000560
+    stigref:
+    - SV-257548r1156737_rule
+    stigref_vulnerability_id:
+    - V-257548
+- id: kubevirt-restrict-cross-datavolume-cloning
+  name: kubevirt-restrict-cross-datavolume-cloning
+  title: Restrict Access to Cross DataVolume Cloning
+  description: 'Because the set of authorized subjects and namespaces is specific
+    to each
+
+    cluster, this rule cannot be evaluated automatically and is reported as
+
+    manual. Organizations can create a CustomRule with a CEL expression that
+
+    lists RoleBindings referencing the <tt>datavolume-cloner</tt> ClusterRole
+
+    and verifies that only approved subjects and destination namespaces are
+
+    bound.'
+  rationale: 'Cross-namespace DataVolume cloning copies disk image data between
+
+    namespaces. If the rolebindings that grant cloning permissions are
+
+    too broad, unauthorized users in destination namespaces can clone
+
+    disks containing sensitive data from source namespaces. Reviewing
+
+    and restricting these rolebindings ensures that only intended
+
+    namespaces and subjects can perform cross-namespace disk cloning
+
+    operations.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to review rolebindings that grant
+
+    cross-namespace DataVolume cloning permissions in the source
+
+    namespace:
+
+    <pre>$ oc get rolebinding -n &lt;source-namespace&gt; &lt;allow-clone-to-user&gt;
+    -oyaml</pre>
+
+    Review rolebindings binding a <tt>datavolume-cloner</tt>-style
+
+    ClusterRole to service accounts in other namespaces. Verify that
+
+    destination namespaces are intended and only authorized subjects
+
+    are bound.'
+- id: kubevirt-restrict-exec-access-to-pods
+  name: kubevirt-restrict-exec-access-to-pods
+  title: Restrict Exec Access to Pods
+  description: 'Because the set of authorized subjects varies by organization, this
+    rule
+
+    requires manual verification. Consider creating a CustomRule with a CEL
+
+    expression that inspects ClusterRoleBindings and RoleBindings for subjects
+
+    granted the <tt>pods/exec</tt> permission, asserting that only your
+
+    approved administrators appear in the results.'
+  rationale: 'Exec access to pods provides an interactive channel into the
+
+    container runtime environment. In an OpenShift Virtualization
+
+    context, this means direct access to the processes backing a
+
+    running virtual machine. Granting this capability to unauthorized
+
+    subjects increases the risk of data exfiltration, workload
+
+    tampering, and privilege escalation. Restricting exec access
+
+    ensures that only approved administrators can interact with
+
+    running pods.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check which subjects can exec into pods:
+
+    <pre>$ oc adm policy who-can exec pod</pre>
+
+    Verify that only authorized subjects are listed in the output.'
+- id: kubevirt-restrict-migration-tools-access
+  name: kubevirt-restrict-migration-tools-access
+  title: Restrict Namespace Administrator Access to Migration Tools
+  description: 'Because the set of authorized subjects is specific to each environment,
+
+    this rule requires manual verification. Organizations can create a
+
+    CustomRule using CEL to automate this check by evaluating
+
+    ClusterRoleBindings and ClusterRoles for create and update access to
+
+    <tt>VirtualMachineInstanceMigration</tt> and
+
+    <tt>MigrationPolicy</tt> resources, verifying that only approved
+
+    subjects are bound to those permissions.'
+  rationale: 'Virtual machine live migration moves a running VM between nodes.
+
+    Granting the ability to create <tt>VirtualMachineInstanceMigration</tt>
+
+    or <tt>MigrationPolicy</tt> objects to untrusted or unnecessary
+
+    subjects increases the risk of unplanned resource contention,
+
+    denial of service through excessive migrations, and potential
+
+    exposure of workload data during the migration process. Restricting
+
+    access to these resources ensures that only approved administrators
+
+    can initiate or influence VM migration behavior.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following commands to check which subjects can create
+
+    migration-related resources:
+
+    <pre>$ oc adm policy who-can create vmim</pre>
+
+    <pre>$ oc adm policy who-can create migrationpolicy</pre>
+
+    Verify that only authorized subjects are listed in the output.'
+  controls:
+    stigid:
+    - CNTR-OS-000090
+    stigref:
+    - SV-257513r1156752_rule
+    stigref_vulnerability_id:
+    - V-257513
+- id: kubevirt-restrict-update-access-to-cdi-cr
+  name: kubevirt-restrict-update-access-to-cdi-cr
+  title: Restrict Update Access to the CDI CR
+  description: 'Because the set of authorized subjects is specific to each
+
+    organization, this rule requires manual verification. Organizations
+
+    can create a compliance-operator CustomRule with CEL expressions
+
+    that evaluate ClusterRoleBindings and Roles to verify that only
+
+    their approved subjects hold update access to CDI resources.'
+  rationale: 'The CDI custom resource governs the data import pipeline for
+
+    virtual machine disk images in OpenShift Virtualization. Modifying
+
+    this resource can change upload proxy settings, scratch space
+
+    allocation, and image import behavior. If unauthorized subjects
+
+    can update the CDI CR, they may introduce insecure import sources,
+
+    weaken transport security, or disrupt the disk image provisioning
+
+    workflow. Restricting update access ensures that only approved
+
+    administrators can alter CDI configuration.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check which subjects can update the
+
+    CDI custom resource:
+
+    <pre>$ oc adm policy who-can update cdi</pre>
+
+    Verify that only authorized subjects are listed in the output.'
+- id: kubevirt-restrict-vm-cluster-instance-preference-types
+  name: kubevirt-restrict-vm-cluster-instance-preference-types
+  title: Restrict Create/Modify Virtual Machine Cluster Instance and Preference Types
+  description: 'Because the set of authorized subjects is specific to each environment,
+
+    this rule requires manual verification. Organizations can create a
+
+    CustomRule using CEL to automate this check by evaluating
+
+    ClusterRoleBindings and ClusterRoles for create and update access to
+
+    <tt>virtualmachineclusterinstancetypes</tt> and
+
+    <tt>virtualmachineclusterpreferences</tt> resources, verifying that
+
+    only approved subjects are bound to those permissions.'
+  rationale: 'Cluster instance types and preferences govern the default hardware
+
+    and configuration settings applied to new virtual machines. If
+
+    unauthorized subjects can create or modify these resources, they
+
+    can introduce overly permissive settings, disable security
+
+    controls, or allocate excessive resources across the cluster.
+
+    Restricting access ensures that only approved administrators
+
+    define the VM profiles available to tenants.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following commands to check which subjects can create or
+
+    update cluster instance and preference types:
+
+    <pre>$ oc adm policy who-can create virtualmachineclusterinstancetypes</pre>
+
+    <pre>$ oc adm policy who-can update virtualmachineclusterinstancetypes</pre>
+
+    <pre>$ oc adm policy who-can create virtualmachineclusterpreferences</pre>
+
+    <pre>$ oc adm policy who-can update virtualmachineclusterpreferences</pre>
+
+    Verify that only authorized subjects are listed in the output.'
+- id: kubevirt-restrict-vnc-access-to-workloads
+  name: kubevirt-restrict-vnc-access-to-workloads
+  title: Restrict VNC Access to Cluster Workloads
+  description: 'Because the set of authorized subjects is specific to each
+
+    organization, this rule requires manual review. Organizations can
+
+    create a CustomRule using CEL to automate this check by querying
+
+    RoleBinding resources and verifying that only approved subjects
+
+    are bound to the <tt>token.kubevirt.io:generate</tt> role.'
+  rationale: 'VNC provides direct graphical console access to a running virtual
+
+    machine. In an OpenShift Virtualization environment, this access is
+
+    gated by the <tt>token.kubevirt.io:generate</tt> role. If this role
+
+    is bound too broadly, unauthorized users can view and interact with
+
+    VM desktops, capture screen contents, and input commands. Restricting
+
+    VNC access through careful role binding review ensures that only
+
+    approved subjects can establish console sessions to cluster
+
+    workloads.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to list role bindings that grant VNC access:
+
+    <pre>$ oc get rolebinding -ojson | jq -c ''.items[] | select(.roleRef.name | contains("token.kubevirt.io:generate"))''</pre>
+
+    Verify that only authorized subjects are bound to the
+
+    <tt>token.kubevirt.io:generate</tt> role.'
+  controls:
+    stigid:
+    - CNTR-OS-000500
+    stigref:
+    - SV-257545r1208204_rule
+    stigref_vulnerability_id:
+    - V-257545
+- id: kubevirt-sriov-spoofchk-on
+  name: kubevirt-sriov-spoofchk-on
+  title: SR-IOV Networks Must Enable MAC Spoof Checking
+  description: 'SR-IOV networks must set ''.spec.spoofChk'' to "on" so the NIC rejects
+
+    frames whose source MAC differs from the address assigned to the
+
+    virtual function. Without it, a compromised guest can impersonate other
+
+    workloads or infrastructure at layer 2.
+
+
+    NOTE: this rule reads SriovNetwork resources and therefore requires the
+
+    SR-IOV Network Operator. On clusters without the operator the resource
+
+    type does not exist and the check reports an error; CPE applicability
+
+    for CEL rules (CMP-4483) will mark it Not Applicable instead.'
+  rationale: 'Layer-2 identity is the basis for switching decisions on secondary
+
+    networks. A guest that can spoof MAC addresses can intercept or
+
+    redirect other workloads'' traffic on the same segment.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command:
+
+    <pre>$ oc get sriovnetwork -A -o jsonpath=''{range .items[*]}{.metadata.name}:
+    spoofChk={.spec.spoofChk}{"\n"}{end}''</pre>
+
+    Every SR-IOV network should set spoofChk to "on".'
+  failureReason: 'One or more SriovNetwork resources do not set ''.spec.spoofChk''
+    to "on",
+
+    allowing guests to spoof layer-2 identities.'
+  expression: "sriovnets.items.all(n,\n    has(n.spec.spoofChk) && n.spec.spoofChk\
+    \ == \"on\"\n)"
+  inputs:
+  - name: sriovnets
+    kubernetesInputSpec:
+      apiVersion: sriovnetwork.openshift.io/v1
+      resource: sriovnetworks
+  controls:
+    stigid:
+    - CNTR-OS-000100
+    stigref:
+    - SV-257514r1208195_rule
+    stigref_vulnerability_id:
+    - V-257514
+- id: kubevirt-sriov-vlan-required
+  name: kubevirt-sriov-vlan-required
+  title: SR-IOV Networks Must Declare a Dedicated VLAN
+  description: 'SR-IOV networks used by virtual machines must segment traffic with
+    a
+
+    dedicated VLAN declared in ''.spec.vlan''. An SR-IOV network without a
+
+    VLAN places virtual machine traffic on the untagged provider segment,
+
+    mixing tenant traffic with infrastructure traffic. Environments that
+
+    intentionally use untagged provider networks should tailor the profile
+
+    to exclude this rule for those objects.
+
+
+    NOTE: this rule reads SriovNetwork resources and therefore requires the
+
+    SR-IOV Network Operator. On clusters without the operator the resource
+
+    type does not exist and the check reports an error; CPE applicability
+
+    for CEL rules (CMP-4483) will mark it Not Applicable instead.'
+  rationale: 'Without VLAN segmentation, workloads attached to SR-IOV networks share
+
+    a broadcast domain with other traffic, enabling lateral movement,
+
+    sniffing and spoofing between tenants and toward the infrastructure.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command:
+
+    <pre>$ oc get sriovnetwork -A -o jsonpath=''{range .items[*]}{.metadata.name}:
+    vlan={.spec.vlan}{"\n"}{end}''</pre>
+
+    Every SR-IOV network should declare a non-zero vlan.'
+  failureReason: 'One or more SriovNetwork resources do not declare a dedicated VLAN
+    in
+
+    ''.spec.vlan'', leaving virtual machine traffic unsegmented.'
+  expression: "sriovnets.items.all(n,\n    has(n.spec.vlan) && n.spec.vlan > 0\n)"
+  inputs:
+  - name: sriovnets
+    kubernetesInputSpec:
+      apiVersion: sriovnetwork.openshift.io/v1
+      resource: sriovnetworks
+- id: kubevirt-use-multi-network-policies
+  name: kubevirt-use-multi-network-policies
+  title: Use Multi-Network Policies
+  description: 'Because the required multi-network policy configuration is specific
+
+    to each cluster''s secondary network topology, this rule cannot be
+
+    evaluated automatically and always reports a manual status.
+
+    Organizations that use secondary networks should consider creating
+
+    a CustomRule with a CEL expression that verifies
+
+    <tt>MultiNetworkPolicy</tt> resources exist in the namespaces where
+
+    <tt>NetworkAttachmentDefinition</tt> objects are deployed.'
+  rationale: 'Secondary networks configured through Multus bypass the default
+
+    Kubernetes network policy enforcement. If multi-network policies are
+
+    not applied, workloads on those networks have unrestricted
+
+    connectivity, increasing the risk of lateral movement and
+
+    unauthorized access between virtual machines. Deploying
+
+    <tt>MultiNetworkPolicy</tt> resources ensures that traffic on
+
+    secondary networks is subject to the same segmentation controls
+
+    as the primary cluster network.'
+  severity: medium
+  checkType: Platform
+  instructions: 'Run the following command to check for multi-network policies:
+
+    <pre>$ oc get multi-networkpolicies -A</pre>
+
+    Verify that multi-network policies exist and are configured for
+
+    namespaces that use secondary networks.'

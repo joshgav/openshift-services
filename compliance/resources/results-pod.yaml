@@ -1,0 +1,19 @@
+# oc cp reports:/reports -n openshift-compliance .
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reports
+  namespace: openshift-compliance
+spec:
+  volumes:
+    - name: reports-volume
+      persistentVolumeClaim:
+        claimName: ocp4-high
+  containers:
+    - name: main
+      image: registry.access.redhat.com/ubi9/ubi:latest
+      command: ["sleep", "infinity"]
+      volumeMounts:
+      - mountPath: "/reports"
+        name: reports-volume

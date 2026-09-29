@@ -1,0 +1,22 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: ScanSetting
+metadata:
+  name: first
+  namespace: openshift-compliance
+maxRetryOnTimeout: 2
+rawResultStorage:
+  enabled: true
+  pvAccessModes:
+  - ReadWriteOnce
+  rotation: 3
+  size: 1Gi
+roles:
+- master
+- worker
+scanTolerations:
+- operator: Exists
+schedule: 30 0 * * *
+showNotApplicable: false
+strictNodeScan: false
+suspend: false
+timeout: 15m0s
